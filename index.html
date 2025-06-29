@@ -1,25 +1,19 @@
 <!DOCTYPE html>
 <html lang="es" class="scroll-smooth">
 <head>
+    <!-- Configuración básica de la página -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hoja de Vida Interactiva | Oscar David Torres Baena</title>
+    <!-- Tailwind CSS para estilos rápidos y responsivos -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js para el gráfico de radar de habilidades -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter para una mejor tipografía -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Warm Neutrals & Teal -->
-    <!-- Application Structure Plan: La aplicación se estructura en secciones temáticas navegables (Inicio, Trayectoria, Habilidades, Educación, Contacto) para un flujo lógico. El enfoque principal es transformar la experiencia laboral estática en una línea de tiempo vertical e interactiva, donde el aprendizaje continuo en desarrollo web (incluyendo formación universitaria) se destaca como la actividad más reciente. Al hacer clic en un hito, se revelan los detalles, fomentando la exploración. Las habilidades se visualizan con un gráfico de radar para ofrecer una comprensión rápida y comparativa de las competencias del candidato. Esta estructura fue elegida para mejorar la usabilidad y el impacto visual, permitiendo a los reclutadores digerir la información clave de manera más eficiente y memorable que en un formato de documento tradicional. -->
-    <!-- Visualization & Content Choices:
-        - Perfil Profesional (Informar): Bloque de texto destacado para presentar su resumen ejecutivo. Método: HTML/Tailwind.
-        - Foto de Perfil (Informar): Un espacio para la foto de perfil en la sección de inicio. Objetivo: Humanizar el perfil y hacerlo más personal. Método: HTML/Tailwind.
-        - Experiencia Laboral (Explorar/Cambio): Línea de tiempo interactiva con entrada para "Desarrollo Web (Autoaprendizaje y Universitario)". Objetivo: Mostrar la progresión de la carrera de forma visual y atractiva, destacando el aprendizaje continuo. Interacción: Clic en cada hito para mostrar detalles. Justificación: Fomenta el descubrimiento y es más dinámico que una lista, y enfatiza la actualización de habilidades. Método: HTML/CSS/JS.
-        - Habilidades Técnicas (Comparar/Informar): Gráfico de radar. Objetivo: Visualizar la fortaleza relativa en sus áreas clave. Interacción: Tooltips de Chart.js al pasar el cursor. Justificación: Ofrece una síntesis visual rápida de su perfil técnico diverso. Librería: Chart.js.
-        - Habilidades Blandas (Informar): Cuadrícula de tarjetas con iconos. Objetivo: Presentar competencias interpersonales de forma clara y visual. Método: HTML/Tailwind con caracteres Unicode.
-        - Contacto (Acción): Botones y enlaces claros, incluyendo un botón para descargar el CV en PDF. Objetivo: Facilitar el contacto directo y la descarga del documento. Método: HTML/Tailwind.
-    -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <!-- Estilos personalizados para detalles visuales -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -52,56 +46,29 @@
             transform: scale(1.5);
             box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.3);
         }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 100;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background-color: rgba(0,0,0,0.4);
-            justify-content: center;
-            align-items: center;
-        }
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 90%;
-            position: relative;
-        }
-        .close-button {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 24px;
-            font-weight: bold;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-700">
 
+    <!-- HEADER: Barra de navegación superior -->
     <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
+                <!-- Nombre y verificado -->
                 <div class="flex-shrink-0">
-                    <!-- Replaced image with inline SVG for reliable rendering -->
                     <span class="text-xl font-bold text-teal-500">
                       Oscar David Torres Baena
+                      <!-- Icono de verificado verde -->
                       <svg class="inline-block w-6 h-6 ml-2 align-middle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="12" cy="12" r="12" fill="#22c55e"/>
                         <path d="M7 13.5L10.5 17L17 10.5" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
                       </svg>
                     </span>
                 </div>
+                <!-- Menú de navegación para escritorio -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
+                        <!-- Enlaces a las secciones principales -->
                         <a href="#inicio" class="text-slate-600 hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Inicio</a>
                         <a href="#trayectoria" class="text-slate-600 hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Trayectoria</a>
                         <a href="#habilidades" class="text-slate-600 hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Habilidades</a>
@@ -109,9 +76,11 @@
                         <a href="#contacto" class="text-slate-600 hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Contacto</a>
                     </div>
                 </div>
+                <!-- Botón menú móvil (hamburguesa) -->
                 <div class="md:hidden">
                     <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-teal-500 focus:outline-none">
                         <span class="sr-only">Abrir menú principal</span>
+                        <!-- Icono hamburguesa SVG -->
                         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
@@ -119,8 +88,10 @@
                 </div>
             </div>
         </nav>
+        <!-- Menú móvil desplegable -->
         <div id="mobile-menu" class="md:hidden hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <!-- Enlaces del menú móvil -->
                 <a href="#inicio" class="text-slate-600 hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Inicio</a>
                 <a href="#trayectoria" class="text-slate-600 hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Trayectoria</a>
                 <a href="#habilidades" class="text-slate-600 hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Habilidades</a>
@@ -131,28 +102,34 @@
     </header>
 
     <main>
+        <!-- SECCIÓN INICIO: Foto, nombre y perfil profesional -->
         <section id="inicio" class="py-20 md:py-28">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div class="mb-8">
-                    <!-- Foto de perfil de Oscar David Torres Baena -->
+                    <!-- Foto de perfil -->
                     <img id="profile-picture" class="mx-auto rounded-full w-56 h-56 object-cover border-4 border-teal-500 shadow-lg"
-                         src="https://i.imgur.com/YI6oGfW.jpeg"
+                         src="https://i.imgur.com/YI6oGfW.jpeg" draggable="false"
                          onerror="this.onerror=null;this.src='https://placehold.co/128x128/e0f2f7/26a69a?text=Error+cargando+imagen';"
                          alt="Foto de perfil de Oscar David Torres Baena">
                 </div>
+                <!-- Nombre grande -->
                 <h1 class="text-4xl md:text-6xl font-extrabold text-slate-800 tracking-tight">Oscar David Torres Baena</h1>
+                <!-- Subtítulo -->
                 <p class="mt-4 text-lg md:text-xl font-medium text-teal-600">Estudiante de Ingeniería de Software | Perfil Técnico con Experiencia en Metalmecánica y Electricidad</p>
+                <!-- Descripción de perfil profesional -->
                 <div id="currentProfileText" class="mt-8 max-w-3xl mx-auto text-base md:text-lg text-slate-600 leading-relaxed">
                     <p>
                         Profesional dinámico y comprometido con sólidos conocimientos técnicos en metalmecánica y sistemas eléctricos y de seguridad. Habilidad para aprender rápidamente y manejar diversas tareas eficientemente, destacando en la resolución de problemas. Soy proactivo y adaptable, con una sólida base técnica, comprometido con el aprendizaje continuo y el trabajo en equipo para entregar soluciones de alta calidad. Busco oportunidades para contribuir y crecer en entornos desafiantes, aplicando mi experiencia en producción, mantenimiento y mejora de procesos.
                     </p>
                 </div>
-                 <a href="#contacto" class="mt-10 inline-block bg-teal-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-teal-700 transition-transform transform hover:scale-105">
+                <!-- Botón para ir a la sección de contacto -->
+                <a href="#contacto" class="mt-10 inline-block bg-teal-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-teal-700 transition-transform transform hover:scale-105">
                     Contactar
                 </a>
             </div>
         </section>
 
+        <!-- SECCIÓN TRAYECTORIA: Línea de tiempo de experiencia laboral -->
         <section id="trayectoria" class="py-20 bg-white">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
@@ -162,7 +139,9 @@
                     <p class="mt-2 text-lg text-slate-500">Un recorrido por mi experiencia laboral. Haz clic en cada hito para ver los detalles.</p>
                 </div>
                 <div class="relative max-w-2xl mx-auto">
+                    <!-- Línea vertical de la línea de tiempo -->
                     <div class="absolute left-1/2 w-0.5 h-full bg-slate-200 -translate-x-1/2"></div>
+                    <!-- Aquí se insertan los hitos de la línea de tiempo con JavaScript -->
                     <div id="timeline-container" class="space-y-12">
                         <!-- Timeline items will be injected here by JavaScript -->
                     </div>
@@ -170,6 +149,7 @@
             </div>
         </section>
 
+        <!-- SECCIÓN HABILIDADES: Gráfico de radar y habilidades blandas -->
         <section id="habilidades" class="py-20">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
@@ -180,15 +160,19 @@
                 </div>
                 <div class="grid md:grid-cols-2 gap-12 items-center">
                     <div>
+                        <!-- Título y descripción de habilidades técnicas -->
                         <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">Competencias Técnicas</h3>
                         <p class="text-slate-600 mb-6 text-center">Mi experiencia práctica se concentra en estas áreas clave, donde he desarrollado una base sólida para resolver problemas complejos.</p>
+                        <!-- Gráfico de radar (Chart.js) -->
                         <div class="chart-container">
                             <canvas id="skillsChart"></canvas>
                         </div>
                     </div>
                     <div>
+                        <!-- Título y descripción de habilidades blandas -->
                         <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">Habilidades Blandas</h3>
-                         <p class="text-slate-600 mb-6 text-center">Cualidades que me permiten colaborar eficazmente y adaptarme a nuevos desafíos en cualquier entorno laboral.</p>
+                        <p class="text-slate-600 mb-6 text-center">Cualidades que me permiten colaborar eficazmente y adaptarme a nuevos desafíos en cualquier entorno laboral.</p>
+                        <!-- Tarjetas de habilidades blandas con iconos -->
                         <div class="grid grid-cols-2 gap-4">
                             <div class="bg-white p-4 rounded-lg shadow-md text-center">
                                 <span class="text-3xl">💡</span>
@@ -220,6 +204,7 @@
             </div>
         </section>
 
+        <!-- SECCIÓN EDUCACIÓN: Estudios realizados -->
         <section id="educacion" class="py-20 bg-white">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
@@ -229,7 +214,7 @@
                     <p class="mt-2 text-lg text-slate-500">Mi formación académica es la base de mi desarrollo profesional.</p>
                 </div>
                 <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
-                    <!-- Ingeniería de Software (Primero) -->
+                    <!-- Cada div es un título académico -->
                     <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
                         <p class="font-bold text-teal-600">2023 - Actualmente</p>
                         <h3 class="text-xl font-semibold text-slate-800 mt-2">
@@ -237,7 +222,6 @@
                         </h3>
                         <p class="text-slate-500">Institución Universitaria Pascual Bravo</p>
                     </div>
-                    <!-- Técnico en Cultivos Agrícolas (Segundo) -->
                     <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
                          <p class="font-bold text-teal-600">2018 - 2020</p>
                         <h3 class="text-xl font-semibold text-slate-800 mt-2">
@@ -245,7 +229,6 @@
                         </h3>
                         <p class="text-slate-500">SENA, Instituto Educativa Cocorná</p>
                     </div>
-                    <!-- Bachiller Académico (Tercero) -->
                     <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
                         <p class="font-bold text-teal-600">2009 - 2020</p>
                         <h3 class="text-xl font-semibold text-slate-800 mt-2">
@@ -257,28 +240,28 @@
             </div>
         </section>
 
+        <!-- SECCIÓN CONTACTO: Botones para email, teléfono, WhatsApp y descargar CV -->
         <section id="contacto" class="py-20">
              <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Hablemos</h2>
                 <p class="mt-2 text-lg text-slate-500 max-w-2xl mx-auto">Estoy abierto a nuevas oportunidades y desafíos. Si mi perfil te parece interesante, no dudes en contactarme.</p>
                 <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-6">
-                    <!-- Botón de Email con el logo de imagen -->
+                    <!-- Botón de Email -->
                     <a href="mailto:oscar.torres870@pascualbravo.edu.co" class="inline-flex items-center justify-center bg-white text-slate-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-slate-100 transition-colors w-full sm:w-auto">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Mail_%28iOS%29.svg" alt="Logo de Email" class="w-6 h-6 mr-3 inline-block align-middle">
                         Email
                     </a>
+                    <!-- Botón de Teléfono -->
                     <a href="tel:+573195771122" class="inline-flex items-center justify-center bg-white text-slate-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-slate-100 transition-colors w-full sm:w-auto">
                         <span class="text-xl mr-3">📞</span>
                         Llamar
                     </a>
-                    <!-- Botón de WhatsApp con el logo de imagen -->
+                    <!-- Botón de WhatsApp -->
                     <a href="https://wa.me/qr/U7KEUV6SOI7WG1" target="_blank" class="inline-flex items-center justify-center bg-white text-slate-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-slate-100 transition-colors w-full sm:w-auto">
                         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Logo de WhatsApp" class="w-6 h-6 mr-3 inline-block align-middle">
                         WhatsApp
                     </a>
-                    <!-- Botón para descargar CV en PDF.
-                         IMPORTANTE: Cuando subas esto a GitHub Pages, asegúrate de que el archivo
-                         'Hojadevida_Oscar Torres.pdf.pdf' esté en la misma carpeta que este archivo HTML. -->
+                    <!-- Botón para descargar el CV en PDF -->
                     <a href="Hojadevida_Oscar Torres.pdf.pdf" download="Hojadevida_Oscar_Torres.pdf" target="_blank" class="inline-flex items-center justify-center bg-teal-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-teal-700 transition-colors w-full sm:w-auto">
                         <span class="text-xl mr-3">📄</span>
                         Descargar CV (PDF)
@@ -288,20 +271,24 @@
         </section>
     </main>
 
+    <!-- FOOTER: Pie de página -->
     <footer class="bg-slate-800 text-white">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
             <p>&copy; 2025 Oscar David Torres Baena. Hoja de vida interactiva. </p>
         </div>
     </footer>
 
+    <!-- SCRIPT: Lógica para menú móvil, scroll suave, gráfico de radar y línea de tiempo -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Menú móvil: abrir/cerrar
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
             mobileMenuButton.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
             });
 
+            // Cierra el menú móvil al hacer clic en un enlace
             const mobileLinks = document.querySelectorAll('#mobile-menu a');
             mobileLinks.forEach(link => {
                 link.addEventListener('click', () => {
@@ -309,6 +296,7 @@
                 });
             });
 
+            // Scroll suave para los enlaces internos
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -318,6 +306,7 @@
                 });
             });
 
+            // Gráfico de radar de habilidades técnicas (Chart.js)
             const ctx = document.getElementById('skillsChart').getContext('2d');
             new Chart(ctx, {
                 type: 'radar',
@@ -325,7 +314,7 @@
                     labels: ['Metalmecánica', 'Electricidad y Seguridad', 'Construcción', 'Atención al Cliente', 'Soporte Técnico', 'Desarrollo Web'],
                     datasets: [{
                         label: 'Nivel de Experiencia',
-                        data: [85, 80, 70, 90, 75, 60], // Added a new data point for Web Development (adjust as needed)
+                        data: [85, 80, 70, 90, 75, 60],
                         backgroundColor: 'rgba(13, 148, 136, 0.2)',
                         borderColor: 'rgba(13, 148, 136, 1)',
                         pointBackgroundColor: 'rgba(13, 148, 136, 1)',
@@ -339,39 +328,21 @@
                     responsive: true,
                     scales: {
                         r: {
-                            angleLines: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            },
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            },
-                            pointLabels: {
-                                font: {
-                                    size: 14,
-                                    weight: 'bold'
-                                },
-                                color: '#0f766e'
-                            },
-                            ticks: {
-                                backdropColor: 'rgba(248, 250, 252, 0.8)',
-                                color: '#475569',
-                                stepSize: 20
-                            },
-                             min: 0,
-                             max: 100
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { font: { size: 14, weight: 'bold' }, color: '#0f766e' },
+                            ticks: { backdropColor: 'rgba(248, 250, 252, 0.8)', color: '#475569', stepSize: 20 },
+                            min: 0,
+                            max: 100
                         }
                     },
                     plugins: {
-                        legend: {
-                            display: false
-                        },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
                                     let label = context.dataset.label || '';
-                                    if (label) {
-                                        label += ': ';
-                                    }
+                                    if (label) { label += ': '; }
                                     label += context.raw + '%';
                                     return label;
                                 }
@@ -381,11 +352,12 @@
                 }
             });
 
+            // Datos de la línea de tiempo profesional
             const timelineData = [
                 {
                     date: '2025 - Actualmente',
                     title: 'Desarrollo Web (Autoaprendizaje y Universitario)',
-                    icon: '💻', // Laptop
+                    icon: '💻',
                     company: 'Proyectos Personales / Formación Continua',
                     side: 'left',
                     details: 'Aprendizaje proactivo de fundamentos de desarrollo web, incluyendo HTML, CSS, JavaScript y familiarización con frameworks modernos, a través de recursos de autoaprendizaje y mi formación universitaria en Ingeniería de Software, para construir aplicaciones interactivas y responsivas.'
@@ -393,7 +365,7 @@
                 {
                     date: 'Dic 2024 - Actualmente',
                     title: 'Técnico en Electricidad y Cámaras de Seguridad',
-                    icon: '🔌', // Electric Plug
+                    icon: '🔌',
                     company: 'Formación Práctica',
                     side: 'right',
                     details: 'Instalación y mantenimiento de sistemas eléctricos básicos, iluminación y cámaras de seguridad, asegurando su correcto funcionamiento y cumplimiento de normativas.'
@@ -401,7 +373,7 @@
                 {
                     date: 'May 2023 - Abr 2024',
                     title: 'Atención al Cliente',
-                    icon: '🗣️', // Speaking head
+                    icon: '🗣️',
                     company: 'Autónomo',
                     side: 'left',
                     details: 'Desarrollo de habilidades clave en comunicación efectiva, resolución de problemas y empatía para satisfacer las necesidades de los usuarios y garantizar una experiencia positiva.'
@@ -409,7 +381,7 @@
                 {
                     date: 'Ene 2021 - May 2023',
                     title: 'Auxiliar Avanzado en Metalmecánica',
-                    icon: '🛠️', // Hammer and Wrench
+                    icon: '🛠️',
                     company: 'Efiaire S.A.S',
                     side: 'right',
                     details: 'Realización de tareas de producción, mantenimiento y reparación de piezas. Colaboración en proyectos de fabricación de maquinaria y uso de herramientas especializadas.'
@@ -417,13 +389,14 @@
                 {
                     date: 'Jun 2018 - Dic 2020',
                     title: 'Auxiliar de Construcción',
-                    icon: '🧱', // Brick
+                    icon: '🧱',
                     company: 'Proyectos Varios',
                     side: 'left',
                     details: 'Apoyo en tareas de construcción como carga de materiales, mezcla de concreto, montaje de andamios y soldadura básica, contribuyendo al avance de proyectos.'
                 }
             ];
 
+            // Renderiza la línea de tiempo en el HTML
             const timelineContainer = document.getElementById('timeline-container');
             timelineContainer.innerHTML = '';
             timelineData.forEach((item, index) => {
@@ -447,6 +420,7 @@
                 timelineContainer.innerHTML += itemHTML;
             });
 
+            // Permite mostrar/ocultar detalles de cada hito al hacer clic
             const timelineItems = document.querySelectorAll('.timeline-item');
             timelineItems.forEach(item => {
                 item.addEventListener('click', () => {
@@ -458,6 +432,7 @@
                 });
             });
 
+            // Activa el primer hito por defecto
             if (timelineItems.length > 0) {
                  timelineItems[0].classList.add('active');
             }
