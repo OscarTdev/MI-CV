@@ -337,9 +337,9 @@
     </footer>
 
     <!-- Modal para las explicaciones de habilidades blandas (mantenido aunque los botones de "Elaborar" estén eliminados) -->
-    <div id="skillModal" class="modal">
+    <div id="skillModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
         <div class="modal-content">
-            <span class="close-button">&times;</span>
+            <button type="button" class="close-button" aria-label="Cerrar modal">&times;</button>
             <h3 id="modalTitle" class="text-2xl font-bold text-slate-800 mb-4"></h3>
             <div id="modalContent" class="text-slate-700 text-base">
                 <!-- El contenido del modal se cargaría aquí si la funcionalidad de "Elaborar" estuviera activa -->
