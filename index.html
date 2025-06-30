@@ -1,30 +1,24 @@
 <!DOCTYPE html>
-<html lang="es" class="scroll-smooth"> <!-- Define el idioma de la página y habilita el desplazamiento suave -->
+<html lang="es" class="scroll-smooth">
 <head>
-    <meta charset="UTF-8"> <!-- Especifica la codificación de caracteres para el documento -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Configura el viewport para una respuesta móvil adecuada -->
-    <title>Hoja de Vida Interactiva | Oscar David Torres Baena</title> <!-- Título que aparece en la pestaña del navegador -->
-
-    <!-- Favicon único y llamativo: una 'O' estilizada con un botón de 'Play' en color teal -->
-    <!-- Este SVG está incrustado directamente en la etiqueta link para evitar peticiones HTTP externas y asegurar una carga rápida. -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%20fill%3D%22%230D9488%22%2F%3E%0A%3Cpath%20d%3D%22M10%208L16%2012L10%2016V8Z%22%20fill%3D%22%23FFFFFF%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
-    
-    <script src="https://cdn.tailwindcss.com"></script> <!-- Enlaza la biblioteca Tailwind CSS desde un CDN para estilos rápidos -->
-    <!-- Chart.js ya no es necesario, se comenta para mantener el código limpio -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
-    
-    <!-- Enlaces para la fuente Inter de Google Fonts, utilizada para la tipografía de la página -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoja de Vida Interactiva | Oscar David Torres Baena</title>
+    <!-- Favicon único y llamativo: una 'O' estilizada con patrón de circuito/píxeles en color neon/futurista -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%2210%22%20fill%3D%22%2300FFFF%22%2F%3E%0A%3Cpath%20d%3D%22M10%208L16%2012L10%2016V8Z%22%20fill%3D%22%2325D366%22%2F%3E%0A%3C%2Fsvg%3E" type="image/svg+xml">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    
-    <!-- Estilos CSS personalizados para la página -->
+    <!-- Paleta de colores elegida: Azules/Púrpuras oscuros, Cian Eléctrico, Magenta Neón -->
     <style>
         body {
-            font-family: 'Inter', sans-serif; /* Aplica la fuente Inter a todo el cuerpo del documento */
+            font-family: 'Inter', sans-serif;
+            /* Degradado de fondo futurista */
+            background: linear-gradient(135deg, #0A0A0A 0%, #1A0F2D 50%, #0A0A0A 100%);
         }
-        /* Las clases de chart-container ya no son necesarias si se eliminó el gráfico de habilidades */
-        /*
+        /* Estilos para el contenedor del gráfico de radar */
         .chart-container {
             position: relative;
             width: 100%;
@@ -39,96 +33,103 @@
                 height: 400px;
             }
         }
-        */
-        /* Estilos para la sección de la línea de tiempo (Trayectoria) */
+        /* Estilos para el contenido de los elementos de la línea de tiempo (ocultos por defecto) */
         .timeline-item-content {
-            display: none; /* Oculta el contenido detallado de los hitos por defecto */
-            transition: all 0.3s ease-in-out; /* Añade una transición suave para la aparición/desaparición */
+            display: none;
+            transition: all 0.3s ease-in-out;
         }
+        /* Cuando el elemento de la línea de tiempo está activo, muestra su contenido */
         .timeline-item.active .timeline-item-content {
-            display: block; /* Muestra el contenido detallado cuando el elemento está activo */
+            display: block;
         }
+        /* Transición suave para el punto de la línea de tiempo */
         .timeline-dot {
-            transition: all 0.3s ease; /* Transición suave para el punto de la línea de tiempo */
+            transition: all 0.3s ease;
         }
+        /* Aumenta el tamaño y añade un brillo cian al punto cuando el elemento está activo */
         .timeline-item.active .timeline-dot {
-            transform: scale(1.5); /* Aumenta el tamaño del punto cuando el elemento está activo */
-            box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.3); /* Añade una sombra al punto activo */
+            transform: scale(1.5);
+            box-shadow: 0 0 0 4px rgba(0, 255, 255, 0.3); /* Brillo Cian Eléctrico */
         }
-        
-        /* Estilos para el modal (ventana emergente), utilizado para las explicaciones de habilidades blandas */
+        /* Estilos base para el modal (ventana emergente) */
         .modal {
             display: none; /* Oculto por defecto */
-            position: fixed; /* Fijo en la pantalla */
+            position: fixed; /* Posición fija en la ventana */
             z-index: 1000; /* Se superpone a otros elementos */
             left: 0;
             top: 0;
             width: 100%; /* Ancho completo */
             height: 100%; /* Alto completo */
-            overflow: auto; /* Permite desplazamiento si el contenido es grande */
-            background-color: rgba(0,0,0,0.6); /* Fondo semi-transparente */
-            justify-content: center; /* Centra el contenido horizontalmente */
-            align-items: center; /* Centra el contenido verticalmente */
+            overflow: auto; /* Habilita el scroll si el contenido es grande */
+            background-color: rgba(0,0,0,0.8); /* Fondo semi-transparente oscuro */
+            justify-content: center; /* Centra horizontalmente */
+            align-items: center; /* Centra verticalmente */
         }
+        /* Estilos para el contenido del modal */
         .modal-content {
-            background-color: #fefefe; /* Color de fondo del contenido del modal */
-            padding: 30px; /* Relleno interno */
-            border-radius: 10px; /* Esquinas redondeadas */
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Sombra para el modal */
-            max-width: 600px; /* Ancho máximo */
-            width: 90%; /* Ancho adaptable */
-            position: relative; /* Posicionamiento relativo para el botón de cierre */
+            background-color: #1a1a1a; /* Fondo oscuro para el modal */
+            color: #E0E0E0; /* Texto claro para el modal */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,255,255,0.3); /* Sombra cian */
+            max-width: 600px;
+            width: 90%;
+            position: relative;
             animation-name: animatetop; /* Animación de entrada */
             animation-duration: 0.4s; /* Duración de la animación */
+            border: 1px solid #00FFFF; /* Borde Cian Eléctrico */
         }
         /* Animación para que el modal aparezca desde arriba */
         @keyframes animatetop {
             from {top: -300px; opacity: 0}
             to {top: 0; opacity: 1}
         }
+        /* Estilos para el botón de cierre del modal */
         .close-button {
-            position: absolute; /* Posicionamiento absoluto dentro del modal */
-            top: 10px; /* Distancia desde la parte superior */
-            right: 15px; /* Distancia desde la derecha */
-            color: #aaa; /* Color del icono de cierre */
-            font-size: 28px; /* Tamaño de la fuente del icono de cierre */
-            font-weight: bold; /* Grosor de la fuente */
-            cursor: pointer; /* Cambia el cursor a una mano al pasar por encima */
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #00FFFF; /* Color Cian Eléctrico para el botón de cierre */
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
         }
+        /* Cambio de color del botón de cierre al pasar el ratón */
         .close-button:hover,
         .close-button:focus {
-            color: black; /* Cambia el color al pasar el ratón */
-            text-decoration: none; /* Elimina la decoración de texto */
-            cursor: pointer; /* Asegura el cursor de mano */
+            color: #FF00FF; /* Magenta Neón al pasar el ratón */
+            text-decoration: none;
+            cursor: pointer;
         }
-        /* Estilos para el cargador (spinner) dentro del modal */
+        /* Estilos para el indicador de carga (loader) */
         .loader {
-            border: 4px solid #f3f3f3; /* Borde gris claro */
-            border-top: 4px solid #0d9488; /* Borde superior teal */
-            border-radius: 50%; /* Forma circular */
-            width: 24px; /* Ancho */
-            height: 24px; /* Alto */
-            animation: spin 1s linear infinite; /* Animación de giro */
-            display: inline-block; /* Se muestra en línea */
-            vertical-align: middle; /* Alineación vertical */
-            margin-right: 8px; /* Margen a la derecha */
+            border: 4px solid #333; /* Gris oscuro */
+            border-top: 4px solid #00FFFF; /* Cian Eléctrico */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
         }
-        /* Animación de giro para el cargador */
+        /* Animación de giro para el loader */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-700">
+<body class="text-gray-200">
 
     <!-- Sección del encabezado y la barra de navegación -->
-    <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+    <header class="bg-black/80 backdrop-blur-lg sticky top-0 z-50 shadow-lg border-b border-cyan-700">
         <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex-shrink-0">
                     <!-- Título de la página con un "badge" de verificado (SVG en línea) -->
-                    <span class="text-xl font-bold text-teal-600">Oscar David Torres Baena
+                    <span class="text-xl font-bold text-cyan-400">Oscar David Torres Baena
+                        <!-- Icono de verificación SVG -->
                         <svg class="inline-block w-5 h-5 ml-1 -mt-1 align-middle" viewBox="0 0 24 24" fill="#25D366" xmlns="http://www.w3.org/2000/svg">
                             <circle cx="12" cy="12" r="10" fill="#25D366"/>
                             <path d="M9.707 13.293L8.293 11.879a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4a1 1 0 0 0-1.414-1.414L9.707 13.293z" fill="#FFFFFF"/>
@@ -138,18 +139,17 @@
                 <!-- Menú de navegación para pantallas grandes (desktop) -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#inicio" class="text-slate-600 hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Inicio</a>
-                        <a href="#trayectoria" class="text-slate-600 hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Trayectoria</a>
-                        <a href="#habilidades" class="text-slate-600 hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Habilidades</a>
-                        <a href="#educacion" class="text-slate-600 hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Educación</a>
-                        <a href="#contacto" class="text-slate-600 hover:bg-teal-500 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Contacto</a>
+                        <a href="#inicio" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Inicio</a>
+                        <a href="#trayectoria" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Trayectoria</a>
+                        <a href="#habilidades" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Habilidades</a>
+                        <a href="#educacion" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Educación</a>
+                        <a href="#contacto" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Contacto</a>
                     </div>
                 </div>
                 <!-- Botón de menú para pantallas pequeñas (móvil) -->
                 <div class="md:hidden">
-                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-400 hover:text-white hover:bg-teal-500 focus:outline-none">
+                    <button id="mobile-menu-button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-purple-700 focus:outline-none transition-colors duration-300">
                         <span class="sr-only">Abrir menú principal</span>
-                        <!-- Icono de hamburguesa (SVG) para el menú móvil -->
                         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
@@ -157,14 +157,14 @@
                 </div>
             </div>
         </nav>
-        <!-- Menú de navegación desplegable para móvil -->
+        <!-- Menú de navegación desplegable para móvil (oculto por defecto) -->
         <div id="mobile-menu" class="md:hidden hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <a href="#inicio" class="text-slate-600 hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Inicio</a>
-                <a href="#trayectoria" class="text-slate-600 hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Trayectoria</a>
-                <a href="#habilidades" class="text-slate-600 hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Habilidades</a>
-                <a href="#educacion" class="text-slate-600 hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Educación</a>
-                <a href="#contacto" class="text-slate-600 hover:bg-teal-500 hover:text-white block px-3 py-2 rounded-md text-base font-medium">Contacto</a>
+                <a href="#inicio" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Inicio</a>
+                <a href="#trayectoria" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Trayectoria</a>
+                <a href="#habilidades" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Habilidades</a>
+                <a href="#educacion" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Educación</a>
+                <a href="#contacto" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Contacto</a>
             </div>
         </div>
     </header>
@@ -175,40 +175,42 @@
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <div class="mb-8">
                     <!-- Foto de perfil de Oscar David Torres Baena -->
-                    <img id="profile-picture" class="mx-auto rounded-full w-32 h-32 object-cover border-4 border-teal-500 shadow-lg"
+                    <img id="profile-picture" class="mx-auto rounded-full w-32 h-32 object-cover border-4 border-cyan-400 shadow-lg shadow-cyan-600/50"
                          src="https://i.imgur.com/YI6oGfW.jpeg"
-                         onerror="this.onerror=null;this.src='https://placehold.co/128x128/e0f2f7/26a69a?text=Error+cargando+imagen';"
+                         onerror="this.onerror=null;this.src='https://placehold.co/128x128/1A0F2D/00FFFF?text=Error+cargando+imagen';"
                          alt="Foto de perfil de Oscar David Torres Baena">
                 </div>
-                <h1 class="text-4xl md:text-6xl font-extrabold text-slate-800 tracking-tight">Oscar David Torres Baena</h1>
-                <p class="mt-4 text-lg md:text-xl font-medium text-teal-600">Estudiante de Ingeniería de Software | Perfil Técnico con Experiencia en Metalmecánica y Electricidad</p>
-                <div id="currentProfileText" class="mt-8 max-w-3xl mx-auto text-base md:text-lg text-slate-600 leading-relaxed">
-                    <!-- Perfil Profesional actualizado del PDF -->
+                <!-- Título principal con colores y sombras futuristas -->
+                <h1 class="text-4xl md:text-6xl font-extrabold text-cyan-400 tracking-tight drop-shadow-lg shadow-cyan-500">Oscar David Torres Baena</h1>
+                <!-- Subtítulo del perfil -->
+                <p class="mt-4 text-lg md:text-xl font-medium text-purple-400">Estudiante de Ingeniería de Software | Perfil Técnico con Experiencia en Metalmecánica y Electricidad</p>
+                <!-- Descripción del perfil profesional -->
+                <div id="currentProfileText" class="mt-8 max-w-3xl mx-auto text-gray-300 text-base md:text-lg leading-relaxed">
                     <p>
-                        Técnico en cultivos agrícolas con formación en metalmecánica, electricidad y seguridad electrónica. Estudiante de Ingeniería de Software, dinámico y adaptable, con habilidades en resolución de problemas, trabajo en equipo y atención al cliente. Busco aportar en producción, soporte técnico, instalaciones eléctricas, mantenimiento y desarrollo de software.
+                        Profesional dinámico y comprometido con sólidos conocimientos técnicos en metalmecánica y sistemas eléctricos y de seguridad. Habilidad para aprender rápidamente y manejar diversas tareas eficientemente, destacando en la resolución de problemas. Soy proactivo y adaptable, con una sólida base técnica, comprometido con el aprendizaje continuo y el trabajo en equipo para entregar soluciones de alta calidad. Busco oportunidades para contribuir y crecer en entornos desafiantes, aplicando mi experiencia en producción, mantenimiento y mejora de procesos.
                     </p>
                 </div>
-                 <!-- Botón para ir a la sección de contacto -->
-                 <a href="#contacto" class="mt-10 inline-block bg-teal-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:bg-teal-700 transition-transform transform hover:scale-105">
+                 <!-- Botón para ir a la sección de contacto, con estilo futurista -->
+                 <a href="#contacto" class="mt-10 inline-block bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg shadow-purple-500/50 hover:bg-purple-600 transition-transform transform hover:scale-105 border border-purple-400">
                     Contactar
                 </a>
             </div>
         </section>
 
         <!-- Sección de Trayectoria Profesional: Línea de tiempo de la experiencia laboral -->
-        <section id="trayectoria" class="py-20 bg-white">
+        <section id="trayectoria" class="py-20 bg-gray-900 border-t border-b border-cyan-800">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <h2 class="text-3xl font-bold text-slate-800 tracking-tight">
+                    <h2 class="text-3xl font-bold text-cyan-400 tracking-tight">
                         <span class="text-3xl mr-2">💼</span>Trayectoria Profesional
                     </h2>
-                    <p class="mt-2 text-lg text-slate-500">Un recorrido por mi experiencia laboral. Haz clic en cada hito para ver los detalles.</p>
+                    <p class="mt-2 text-lg text-gray-400">Un recorrido por mi experiencia laboral. Haz clic en cada hito para ver los detalles.</p>
                 </div>
                 <div class="relative max-w-2xl mx-auto">
-                    <!-- Línea vertical central de la línea de tiempo -->
-                    <div class="absolute inset-y-0 left-1/2 w-0.5 bg-slate-200 transform -translate-x-1/2 z-0"></div>
+                    <!-- Línea vertical central de la línea de tiempo, con color cian oscuro -->
+                    <div class="absolute inset-y-0 left-1/2 w-0.5 bg-cyan-900 transform -translate-x-1/2 z-0"></div>
 
-                    <!-- Contenedor para los elementos de la línea de tiempo -->
+                    <!-- Contenedor para los elementos de la línea de tiempo (se inyectarán con JavaScript) -->
                     <div id="timeline-container" class="flex flex-col space-y-12 items-center">
                         <!-- Los elementos de la línea de tiempo se inyectarán aquí mediante JavaScript -->
                     </div>
@@ -220,68 +222,95 @@
         <section id="habilidades" class="py-20">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <h2 class="text-3xl font-bold text-slate-800 tracking-tight">
+                    <h2 class="text-3xl font-bold text-cyan-400 tracking-tight">
                         <span class="text-3xl mr-2">🌟</span>Mis Habilidades
                     </h2>
-                    <p class="mt-2 text-lg text-slate-500">Un vistazo a mis competencias técnicas y blandas.</p>
+                    <p class="mt-2 text-lg text-gray-400">Un vistazo a mis competencias técnicas y blandas.</p>
                 </div>
-                <!-- Contenedor de cuadrícula para las habilidades, se adapta a 2 columnas en pantallas grandes -->
-                <div class="grid md:grid-cols-2 gap-12 items-start"> <!-- Cambiado items-center a items-start para una mejor alineación del texto -->
+                <!-- Contenedor de cuadrícula para las habilidades -->
+                <div class="grid md:grid-cols-2 gap-12 items-center">
                     <div>
-                        <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">Competencias Técnicas</h3>
-                        <p class="text-slate-600 mb-6 text-center">Mi experiencia práctica se concentra en estas áreas clave, donde he desarrollado una base sólida para resolver problemas complejos.</p>
-                        <!-- Habilidades Técnicas actualizadas del PDF, presentadas como una lista con viñetas -->
-                        <ul class="list-disc list-inside text-slate-600 space-y-2 text-left mx-auto max-w-md">
-                            <li>Instalación y mantenimiento de sistemas eléctricos</li>
-                            <li>Seguridad electrónica: instalación de cámaras de vigilancia</li>
-                            <li>Producción y mantenimiento de equipos metálicos</li>
-                            <li>Soporte técnico y atención al cliente</li>
-                            <li>Fundamentos de desarrollo web: HTML, CSS, JavaScript</li>
-                            <li>Manejo de herramientas y maquinaria especializada</li>
-                            <li>Optimización de procesos y resolución de problemas</li>
-                        </ul>
+                        <h3 class="text-xl font-semibold text-cyan-400 mb-4 text-center">Competencias Técnicas</h3>
+                        <p class="text-gray-300 mb-6 text-center">Mi experiencia práctica se concentra en estas áreas clave, donde he desarrollado una base sólida para resolver problemas complejos.</p>
+                        <!-- Contenedor para el gráfico de radar -->
+                        <div class="chart-container">
+                            <canvas id="skillsChart"></canvas>
+                        </div>
                     </div>
                     <div>
-                        <h3 class="text-xl font-semibold text-slate-800 mb-4 text-center">Habilidades Blandas</h3>
-                         <p class="text-slate-600 mb-6 text-center">Cualidades que me permiten colaborar eficazmente y adaptarme a nuevos desafíos en cualquier entorno laboral.</p>
-                        <!-- Habilidades Blandas actualizadas del PDF, presentadas como una lista con viñetas -->
-                        <ul class="list-disc list-inside text-slate-600 space-y-2 text-left mx-auto max-w-md">
-                            <li>Comunicación efectiva</li>
-                            <li>Trabajo en equipo</li>
-                            <li>Liderazgo</li>
-                            <li>Adaptabilidad</li>
-                            <li>Empatía</li>
-                        </ul>
+                        <h3 class="text-xl font-semibold text-cyan-400 mb-4 text-center">Habilidades Blandas</h3>
+                         <p class="text-gray-300 mb-6 text-center">Cualidades que me permiten colaborar eficazmente y adaptarme a nuevos desafíos en cualquier entorno laboral.</p>
+                        <!-- Habilidades Blandas de Oscar con iconos y botones "Elaborar" -->
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Cada habilidad blanda es una tarjeta con estilo futurista -->
+                            <div class="bg-gray-800 p-4 rounded-lg shadow-lg shadow-purple-900/50 text-center flex flex-col items-center border border-purple-700">
+                                <span class="text-3xl text-purple-400">💡</span>
+                                <p class="font-semibold mt-2 soft-skill-name text-gray-100">Resolución de Problemas</p>
+                                <button class="elaborate-skill-btn mt-3 bg-purple-700 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-600 transition-colors duration-300">✨ Elaborar</button>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg shadow-lg shadow-purple-900/50 text-center flex flex-col items-center border border-purple-700">
+                                <span class="text-3xl text-purple-400">📚</span>
+                                <p class="font-semibold mt-2 soft-skill-name text-gray-100">Habilidad para aprender rápidamente y adaptarme</p>
+                                <button class="elaborate-skill-btn mt-3 bg-purple-700 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-600 transition-colors duration-300">✨ Elaborar</button>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg shadow-lg shadow-purple-900/50 text-center flex flex-col items-center">
+                                <span class="text-3xl text-purple-400">👥</span>
+                                <p class="font-semibold mt-2 soft-skill-name text-gray-100">Trabajo en Equipo y Comunicación</p>
+                                <button class="elaborate-skill-btn mt-3 bg-purple-700 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-600 transition-colors duration-300">✨ Elaborar</button>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg shadow-lg shadow-purple-900/50 text-center flex flex-col items-center">
+                                <span class="text-3xl text-purple-400">⚡</span>
+                                <p class="font-semibold mt-2 soft-skill-name text-gray-100">Proactividad e Iniciativa</p>
+                                <button class="elaborate-skill-btn mt-3 bg-purple-700 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-600 transition-colors duration-300">✨ Elaborar</button>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg shadow-lg shadow-purple-900/50 text-center flex flex-col items-center">
+                                <span class="text-3xl text-purple-400">🎯</span>
+                                <p class="font-semibold mt-2 soft-skill-name text-gray-100">Orientación a Resultados y Compromiso</p>
+                                <button class="elaborate-skill-btn mt-3 bg-purple-700 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-600 transition-colors duration-300">✨ Elaborar</button>
+                            </div>
+                            <div class="bg-gray-800 p-4 rounded-lg shadow-lg shadow-purple-900/50 text-center flex flex-col items-center">
+                                <span class="text-3xl text-purple-400">🔍</span>
+                                <p class="font-semibold mt-2 soft-skill-name text-gray-100">Atención al Detalle</p>
+                                <button class="elaborate-skill-btn mt-3 bg-purple-700 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-600 transition-colors duration-300">✨ Elaborar</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </section>
 
         <!-- Sección de Educación: Detalles de la formación académica -->
-        <section id="educacion" class="py-20 bg-white">
+        <section id="educacion" class="py-20 bg-gray-900 border-t border-b border-cyan-800">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <h2 class="text-3xl font-bold text-slate-800 tracking-tight">
+                    <h2 class="text-3xl font-bold text-cyan-400 tracking-tight">
                         <span class="text-3xl mr-2">🎓</span>Educación
                     </h2>
-                    <p class="mt-2 text-lg text-slate-500">Mi formación académica es la base de mi desarrollo profesional.</p>
+                    <p class="mt-2 text-lg text-gray-400">Mi formación académica es la base de mi desarrollo profesional.</p>
                 </div>
                 <!-- Contenedor de cuadrícula para la educación -->
                 <div class="max-w-4xl mx-auto grid md:grid-cols-2 gap-8">
-                    <!-- Formación Académica actualizada del PDF -->
-                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                        <p class="font-bold text-teal-600">2023 - Actualmente</p>
-                        <h3 class="text-xl font-semibold text-slate-800 mt-2">
-                            <span class="text-xl mr-2">💻</span>Estudiante de Ingeniería de Software
+                    <!-- Cada bloque de educación tiene un estilo futurista -->
+                    <div class="bg-gray-800 p-6 rounded-lg border border-cyan-700 shadow-lg shadow-cyan-900/50">
+                        <p class="font-bold text-purple-400">2023 - Actualmente</p>
+                        <h3 class="text-xl font-semibold text-cyan-400 mt-2">
+                            <span class="text-xl mr-2">💻</span>Ingeniería de Software
                         </h3>
-                        <p class="text-slate-500">Institución Universitaria Pascual Bravo</p>
+                        <p class="text-gray-300">Institución Universitaria Pascual Bravo</p>
                     </div>
-                    <div class="bg-slate-50 p-6 rounded-lg border border-slate-200">
-                         <p class="font-bold text-teal-600">2018 - 2020</p>
-                        <h3 class="text-xl font-semibold text-slate-800 mt-2">
+                    <div class="bg-gray-800 p-6 rounded-lg border border-cyan-700 shadow-lg shadow-cyan-900/50">
+                         <p class="font-bold text-purple-400">2018 - 2020</p>
+                        <h3 class="text-xl font-semibold text-cyan-400 mt-2">
                             <span class="text-xl mr-2">🌾</span>Técnico en Cultivos Agrícolas
                         </h3>
-                        <p class="text-slate-500">SENA - Instituto Educativa Cocorná</p>
+                        <p class="text-gray-300">SENA, Instituto Educativa Cocorná</p>
+                    </div>
+                    <div class="bg-gray-800 p-6 rounded-lg border border-cyan-700 shadow-lg shadow-cyan-900/50">
+                        <p class="font-bold text-purple-400">2009 - 2020</p>
+                        <h3 class="text-xl font-semibold text-cyan-400 mt-2">
+                            <span class="text-xl mr-2">🏫</span>Bachiller Académico
+                        </h3>
+                        <p class="text-gray-300">Institución Educativa Cocorná</p>
                     </div>
                 </div>
             </div>
@@ -290,37 +319,37 @@
         <!-- Sección de Contacto: Información de contacto y redes sociales -->
         <section id="contacto" class="py-20">
              <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Hablemos</h2>
-                <p class="mt-2 text-lg text-slate-500 max-w-2xl mx-auto">Estoy abierto a nuevas oportunidades y desafíos. Si mi perfil te parece interesante, no dudes en contactarme.</p>
+                <h2 class="text-3xl font-bold text-cyan-400 tracking-tight">Hablemos</h2>
+                <p class="mt-2 text-lg text-gray-400 max-w-2xl mx-auto">Estoy abierto a nuevas oportunidades y desafíos. Si mi perfil te parece interesante, no dudes en contactarme.</p>
                 <div class="mt-10 flex flex-wrap items-center justify-center gap-6">
-                    <!-- Bloque de contacto principal: Email, Llamar, WhatsApp, con enlaces y logos actualizados del PDF -->
-                    <a href="mailto:correodeestudio19@gmail.com" class="inline-flex items-center justify-center bg-white text-slate-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-slate-100 transition-colors w-full sm:w-auto border border-gray-300">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Mail_%28iOS%29.svg" alt="Logo de Email" class="w-6 h-6 mr-3 inline-block align-middle">
+                    <!-- Bloques de contacto principales (Email, Llamar, WhatsApp) con estilo futurista -->
+                    <a href="mailto:oscar.torres870@pascualbravo.edu.co" class="inline-flex items-center justify-center bg-gray-800 text-gray-200 font-semibold py-3 px-6 rounded-lg shadow-lg shadow-purple-900/50 hover:bg-gray-700 transition-colors duration-300 w-full sm:w-auto border border-purple-700">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/4/4e/Mail_%28iOS%29.svg" alt="Logo de Email" class="w-6 h-6 mr-3 inline-block align-middle filter brightness-150">
                         Email
                     </a>
-                    <a href="tel:+573195771122" class="inline-flex items-center justify-center bg-white text-slate-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-slate-100 transition-colors w-full sm:w-auto border border-gray-300">
-                        <span class="text-xl mr-3">📞</span>
+                    <a href="tel:+573195771122" class="inline-flex items-center justify-center bg-gray-800 text-gray-200 font-semibold py-3 px-6 rounded-lg shadow-lg shadow-purple-900/50 hover:bg-gray-700 transition-colors duration-300 w-full sm:w-auto border border-purple-700">
+                        <span class="text-xl mr-3 text-purple-400">📞</span>
                         Llamar
                     </a>
-                    <a href="https://wa.me/qr/U7KEUV6SOI7WG1" target="_blank" class="inline-flex items-center justify-center bg-white text-slate-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-slate-100 transition-colors w-full sm:w-auto border border-gray-300">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Logo de WhatsApp" class="w-6 h-6 mr-3 inline-block align-middle">
+                    <a href="https://wa.me/qr/U7KEUV6SOI7WG1" target="_blank" class="inline-flex items-center justify-center bg-gray-800 text-gray-200 font-semibold py-3 px-6 rounded-lg shadow-lg shadow-purple-900/50 hover:bg-gray-700 transition-colors duration-300 w-full sm:w-auto border border-purple-700">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="Logo de WhatsApp" class="w-6 h-6 mr-3 inline-block align-middle filter brightness-150">
                         WhatsApp
                     </a>
-                    <!-- Redes Sociales: Instagram, Facebook, LinkedIn, con enlaces y logos actualizados del PDF -->
-                    <a href="https://www.instagram.com/baena.o?igsh=MjhnbHNjdTlxbGR0" target="_blank" class="inline-flex items-center justify-center bg-white text-slate-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-slate-100 transition-colors w-full sm:w-auto border border-gray-300">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Logo de Instagram" class="w-6 h-6 mr-3 inline-block align-middle">
+                    <!-- Redes Sociales: Instagram, Facebook, LinkedIn (con enlaces de ejemplo) -->
+                    <a href="https://www.instagram.com/baena.o?igsh=MjhnbHNjdTlxbGR0" target="_blank" class="inline-flex items-center justify-center bg-gray-800 text-gray-200 font-semibold py-3 px-6 rounded-lg shadow-lg shadow-purple-900/50 hover:bg-gray-700 transition-colors duration-300 w-full sm:w-auto border border-purple-700">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e7/Instagram_logo_2016.svg" alt="Logo de Instagram" class="w-6 h-6 mr-3 inline-block align-middle filter brightness-150">
                         Instagram
                     </a>
-                    <a href="https://www.facebook.com/share/1JR7h8X6RN/" target="_blank" class="inline-flex items-center justify-center bg-white text-slate-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-slate-100 transition-colors w-full sm:w-auto border border-gray-300">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Logo de Facebook" class="w-6 h-6 mr-3 inline-block align-middle">
+                    <a href="https://www.facebook.com/share/1JR7h8X6RN/" target="_blank" class="inline-flex items-center justify-center bg-gray-800 text-gray-200 font-semibold py-3 px-6 rounded-lg shadow-lg shadow-purple-900/50 hover:bg-gray-700 transition-colors duration-300 w-full sm:w-auto border border-purple-700">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/51/Facebook_f_logo_%282019%29.svg" alt="Logo de Facebook" class="w-6 h-6 mr-3 inline-block align-middle filter brightness-150">
                         Facebook
                     </a>
-                    <a href="https://www.linkedin.com/in/oscar-david-torres-baena-53493428b" target="_blank" class="inline-flex items-center justify-center bg-white text-slate-700 font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-slate-100 transition-colors w-full sm:w-auto border border-gray-300">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="Logo de LinkedIn" class="w-6 h-6 mr-3 inline-block align-middle">
+                    <a href="https://www.linkedin.com/in/oscar-david-torres-baena-53493428b" target="_blank" class="inline-flex items-center justify-center bg-gray-800 text-gray-200 font-semibold py-3 px-6 rounded-lg shadow-lg shadow-purple-900/50 hover:bg-gray-700 transition-colors duration-300 w-full sm:w-auto border border-purple-700">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/LinkedIn_logo_initials.png" alt="Logo de LinkedIn" class="w-6 h-6 mr-3 inline-block align-middle filter brightness-150">
                         LinkedIn
                     </a>
-                    <!-- Botón para descargar CV en PDF. La ruta del archivo apunta al PDF subido por el usuario. -->
-                    <a href="Oscar_Torres_Hoja_de_Vida.pdf" download="Oscar_Torres_Hoja_de_Vida.pdf" target="_blank" class="inline-flex items-center justify-center bg-teal-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-teal-700 transition-colors w-full sm:w-auto border border-teal-600">
+                    <!-- Botón para descargar CV en PDF, enlazando al archivo proporcionado por el usuario -->
+                    <a href="Oscar_Torres_Hoja_de_Vida.pdf" download="Oscar_Torres_Hoja_de_Vida.pdf" target="_blank" class="inline-flex items-center justify-center bg-cyan-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-cyan-500/50 hover:bg-cyan-700 transition-colors duration-300 w-full sm:w-auto border border-cyan-400">
                         <span class="text-xl mr-3">📄</span>
                         Descargar CV (PDF)
                     </a>
@@ -330,19 +359,19 @@
     </main>
 
     <!-- Sección del pie de página -->
-    <footer class="bg-slate-800 text-white">
+    <footer class="bg-gray-950 text-gray-500 border-t border-purple-800">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center">
             <p>&copy; 2025 Oscar David Torres Baena. Hoja de vida interactiva. </p>
         </div>
     </footer>
 
-    <!-- Modal para las explicaciones de habilidades blandas (mantenido aunque los botones de "Elaborar" estén eliminados) -->
-    <div id="skillModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <!-- Modal para las explicaciones de habilidades blandas -->
+    <div id="skillModal" class="modal">
         <div class="modal-content">
-            <button type="button" class="close-button" aria-label="Cerrar modal">&times;</button>
-            <h3 id="modalTitle" class="text-2xl font-bold text-slate-800 mb-4"></h3>
-            <div id="modalContent" class="text-slate-700 text-base">
-                <!-- El contenido del modal se cargaría aquí si la funcionalidad de "Elaborar" estuviera activa -->
+            <span class="close-button">&times;</span>
+            <h3 id="modalTitle" class="text-2xl font-bold text-cyan-400 mb-4"></h3>
+            <div id="modalContent" class="text-gray-200 text-base">
+                <!-- El contenido se cargará aquí desde la API de Gemini -->
             </div>
         </div>
     </div>
@@ -350,22 +379,22 @@
     <!-- Script JavaScript para la interactividad de la página -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Obtiene referencias a los elementos del DOM
+            // Obtener referencias a los elementos del DOM
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
             const skillModal = document.getElementById('skillModal');
             const closeButton = document.querySelector('.close-button');
             const modalTitle = document.getElementById('modalTitle');
             const modalContent = document.getElementById('modalContent');
-            // La línea `elaborateSkillBtns` se comenta ya que los botones de "Elaborar" se eliminaron del HTML
-            // const elaborateSkillBtns = document.querySelectorAll('.elaborate-skill-btn');
+            // Seleccionar todos los botones "Elaborar" para las habilidades blandas
+            const elaborateSkillBtns = document.querySelectorAll('.elaborate-skill-btn');
 
-            // Funcionalidad para el botón del menú móvil: muestra/oculta el menú
+            // Funcionalidad para el botón del menú móvil: muestra/oculta el menú de navegación
             mobileMenuButton.addEventListener('click', () => {
                 mobileMenu.classList.toggle('hidden');
             });
 
-            // Oculta el menú móvil al hacer clic en un enlace del menú
+            // Ocultar el menú móvil al hacer clic en un enlace del menú
             const mobileLinks = document.querySelectorAll('#mobile-menu a');
             mobileLinks.forEach(link => {
                 link.addEventListener('click', () => {
@@ -373,64 +402,63 @@
                 });
             });
 
-            // Habilita el desplazamiento suave al hacer clic en los enlaces de la barra de navegación
+            // Habilitar el desplazamiento suave al hacer clic en los enlaces de la barra de navegación
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
                 anchor.addEventListener('click', function (e) {
-                    e.preventDefault(); // Previene el comportamiento de salto predeterminado del enlace
+                    e.preventDefault(); // Prevenir el comportamiento de salto predeterminado
                     document.querySelector(this.getAttribute('href')).scrollIntoView({
                         behavior: 'smooth' // Desplazamiento suave a la sección
                     });
                 });
             });
 
-            // El código de Chart.js se eliminó porque las habilidades ahora son una lista de texto simple
-            /*
+            // Inicialización del gráfico de radar para habilidades técnicas de Oscar
             const ctx = document.getElementById('skillsChart').getContext('2d');
             new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: ['Metalmecánica', 'Electricidad y Seguridad', 'Construcción', 'Atención al Cliente', 'Soporte Técnico', 'Desarrollo Web'],
+                    labels: ['Metalmecánica', 'Electricidad y Seguridad', 'Construcción', 'Atención al Cliente', 'Soporte Técnico', 'Desarrollo Web'], // Etiquetas de las habilidades técnicas
                     datasets: [{
-                        label: 'Nivel de Experiencia',
-                        data: [85, 80, 70, 90, 75, 60],
-                        backgroundColor: 'rgba(13, 148, 136, 0.2)',
-                        borderColor: 'rgba(13, 148, 136, 1)',
-                        pointBackgroundColor: 'rgba(13, 148, 136, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(13, 148, 136, 1)'
+                        label: 'Nivel de Experiencia', // Etiqueta para la leyenda (aunque está oculta)
+                        data: [85, 80, 70, 90, 75, 60], // Valores estimados para las habilidades técnicas de Oscar (en porcentaje)
+                        backgroundColor: 'rgba(0, 255, 255, 0.2)', // Cian Eléctrico con transparencia
+                        borderColor: 'rgba(0, 255, 255, 1)', // Borde Cian Eléctrico
+                        pointBackgroundColor: 'rgba(0, 255, 255, 1)', // Puntos Cian Eléctrico
+                        pointBorderColor: '#fff', // Borde de los puntos blanco
+                        pointHoverBackgroundColor: '#fff', // Color de los puntos al pasar el ratón
+                        pointHoverBorderColor: 'rgba(255, 0, 255, 1)' // Borde Magenta Neón al pasar el ratón
                     }]
                 },
                 options: {
-                    maintainAspectRatio: false,
-                    responsive: true,
+                    maintainAspectRatio: false, // Permite que el gráfico no mantenga su relación de aspecto original
+                    responsive: true, // Hace que el gráfico sea responsivo
                     scales: {
                         r: {
                             angleLines: {
-                                color: 'rgba(0, 0, 0, 0.1)'
+                                color: 'rgba(0, 255, 255, 0.2)' // Líneas de ángulo Cian Eléctrico
                             },
                             grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
+                                color: 'rgba(0, 255, 255, 0.2)' // Cuadrícula Cian Eléctrico
                             },
                             pointLabels: {
                                 font: {
                                     size: 14,
                                     weight: 'bold'
                                 },
-                                color: '#0f766e'
+                                color: '#00FFFF' // Cian Eléctrico para las etiquetas
                             },
                             ticks: {
-                                backdropColor: 'rgba(248, 250, 252, 0.8)',
-                                color: '#475569',
-                                stepSize: 20
+                                backdropColor: 'rgba(10, 10, 10, 0.8)', // Fondo oscuro para los ticks
+                                color: '#E0E0E0', // Gris claro para los ticks
+                                stepSize: 20 // Incremento de los ticks
                             },
-                             min: 0,
-                             max: 100
+                             min: 0, // Valor mínimo del eje
+                             max: 100 // Valor máximo del eje
                         }
                     },
                     plugins: {
                         legend: {
-                            display: false
+                            display: false // No muestra la leyenda del gráfico
                         },
                         tooltip: {
                             callbacks: {
@@ -439,7 +467,7 @@
                                     if (label) {
                                         label += ': ';
                                     }
-                                    label += context.raw + '%';
+                                    label += context.raw + '%'; // Muestra el valor en porcentaje en el tooltip
                                     return label;
                                 }
                             }
@@ -447,67 +475,105 @@
                     }
                 }
             });
-            */
 
-            // Datos para la línea de tiempo de la experiencia profesional, actualizados del PDF
-            // Los elementos están ordenados cronológicamente inverso (el más reciente primero)
+            // Datos para la línea de tiempo de la experiencia profesional de Oscar
             const timelineData = [
+                {
+                    date: '2025 - Actualmente',
+                    title: 'Desarrollo Web (Autoaprendizaje y Universitario)',
+                    icon: '💻', // Icono de portátil
+                    company: 'Proyectos Personales / Formación Continua',
+                    side: 'left', // Posición en la línea de tiempo
+                    details: 'Aprendizaje proactivo de fundamentos de desarrollo web, incluyendo HTML, CSS, JavaScript y familiarización con frameworks modernos, a través de recursos de autoaprendizaje y mi formación universitaria en Ingeniería de Software, para construir aplicaciones interactivas y responsivas.',
+                    images: [
+                        'https://placehold.co/400x250/a7f3d0/0d9488?text=Desarrollo+Web+1',
+                        'https://placehold.co/400x250/6ee7b7/0d9488?text=Desarrollo+Web+2',
+                        'https://placehold.co/400x250/2dd4bf/0d9488?text=Desarrollo+Web+3'
+                    ]
+                },
+                {
+                    date: 'Dic 2024 - Actualmente',
+                    title: 'Técnico en Electricidad y Cámaras de Seguridad',
+                    icon: '🔌', // Icono de enchufe eléctrico
+                    company: 'Formación Práctica',
+                    side: 'right',
+                    details: 'Instalación y mantenimiento de sistemas eléctricos básicos, iluminación y cámaras de seguridad, asegurando su correcto funcionamiento y cumplimiento de normativas.',
+                    images: [
+                        'https://placehold.co/400x250/a7f3d0/0d9488?text=Electricidad+1',
+                        'https://placehold.co/400x250/6ee7b7/0d9488?text=Electricidad+2',
+                        'https://placehold.co/400x250/2dd4bf/0d9488?text=Electricidad+3'
+                    ]
+                },
                 {
                     date: 'May 2023 - Abr 2024',
                     title: 'Atención al Cliente',
-                    icon: '🗣️', // Icono de emoji para el hito
-                    company: 'Autónomo', // Nombre de la empresa o contexto
-                    details: 'Asistencia y orientación al cliente. Resolución de consultas técnicas y seguimiento de incidencias.', // Descripción detallada de las responsabilidades/logros
-                    images: [] // Array para imágenes si se desea implementar un carrusel en el futuro
+                    icon: '🗣️', // Icono de cabeza hablando
+                    company: 'Autónomo',
+                    side: 'left',
+                    details: 'Desarrollo de habilidades clave en comunicación efectiva, resolución de problemas y empatía para satisfacer las necesidades de los usuarios y garantizar una experiencia positiva.',
+                    images: [
+                        'https://placehold.co/400x250/a7f3d0/0d9488?text=Atencion+Cliente+1',
+                        'https://placehold.co/400x250/6ee7b7/0d9488?text=Atencion+Cliente+2',
+                        'https://placehold.co/400x250/2dd4bf/0d9488?text=Atencion+Cliente+3'
+                    ]
                 },
                 {
                     date: 'Ene 2021 - May 2023',
                     title: 'Auxiliar Avanzado en Metalmecánica',
-                    icon: '🛠️',
+                    icon: '🛠️', // Icono de martillo y llave inglesa
                     company: 'Efiaire S.A.S',
-                    details: 'Producción, mantenimiento y reparación de piezas y equipos metálicos. Participación en proyectos de fabricación de maquinaria. Manejo eficiente de herramientas y maquinaria especializada.',
-                    images: []
+                    side: 'right',
+                    details: 'Realización de tareas de producción, mantenimiento y reparación de piezas. Colaboración en proyectos de fabricación de maquinaria y uso de herramientas especializadas.',
+                    images: [
+                        'https://placehold.co/400x250/a7f3d0/0d9488?text=Metalcanica+1',
+                        'https://placehold.co/400x250/6ee7b7/0d9488?text=Metalcanica+2',
+                        'https://placehold.co/400x250/2dd4bf/0d9488?text=Metalcanica+3'
+                    ]
                 },
                 {
                     date: 'Jun 2018 - Dic 2020',
                     title: 'Auxiliar de Construcción',
-                    icon: '🧱',
+                    icon: '🧱', // Icono de ladrillo
                     company: 'Proyectos Varios',
-                    details: 'Carga de materiales, mezcla de concreto y montaje de andamios. Apoyo en soldadura básica.',
-                    images: []
+                    side: 'left',
+                    details: 'Apoyo en tareas de construcción como carga de materiales, mezcla de concreto, montaje de andamios y soldadura básica, contribuyendo al avance de proyectos.',
+                    images: [
+                        'https://placehold.co/400x250/a7f3d0/0d9488?text=Construccion+1',
+                        'https://placehold.co/400x250/6ee7b7/0d9488?text=Construccion+2',
+                        'https://placehold.co/400x250/2dd4bf/0d9488?text=Construccion+3'
+                    ]
                 }
             ];
 
-            // Objeto para almacenar el índice de imagen actual para cada elemento de la línea de tiempo (código de carrusel comentado)
+            // Objeto para almacenar el índice de la imagen actual para cada elemento del carrusel (si estuviera activo)
             const currentCarouselIndexes = {};
 
             const timelineContainer = document.getElementById('timeline-container');
-            timelineContainer.innerHTML = ''; // Limpia cualquier contenido previo en el contenedor
+            timelineContainer.innerHTML = ''; // Limpiar cualquier contenido previo en el contenedor
 
-            // Itera sobre los datos de la línea de tiempo para crear dinámicamente los elementos HTML
+            // Iterar sobre los datos de la línea de tiempo para crear dinámicamente los elementos HTML
             timelineData.forEach((item, index) => {
-                const isLeft = index % 2 === 0; // Alterna la posición del elemento (izquierda/derecha)
-                const selfAlignClass = isLeft ? 'md:self-start' : 'md:self-end'; // Alinea el elemento dentro del contenedor flex
+                const isLeft = item.side === 'left'; // Determina si el elemento va a la izquierda o derecha
+                const selfAlignClass = isLeft ? 'md:self-start' : 'md:self-end'; // Clases para alinear el elemento
                 
-                // Posicionamiento horizontal del punto de la línea de tiempo
+                // Posición horizontal del punto de la línea de tiempo (alterna izquierda/derecha)
                 const dotHorizontalPosition = isLeft ? 'right-0 translate-x-1/2' : 'left-0 -translate-x-1/2';
 
-                // Construye el HTML para cada elemento de la línea de tiempo
+                // Construir el HTML para cada elemento de la línea de tiempo
                 const itemHTML = `
                     <div class="relative timeline-item w-full md:w-1/2 px-4 py-2 ${selfAlignClass} z-10">
-                        <!-- Punto de la línea de tiempo, posicionado absolutamente -->
-                        <div class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-2 border-teal-600 rounded-full timeline-dot z-20 ${dotHorizontalPosition}"></div>
-                        <div class="bg-white p-6 rounded-lg shadow-md cursor-pointer border-l-4 border-teal-500 relative z-10">
-                            <p class="text-sm font-semibold text-teal-600">${item.date}</p>
-                            <h4 class="text-lg font-bold text-slate-800 mt-1">
+                        <!-- Punto de la línea de tiempo - posicionado absolutamente -->
+                        <div class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-gray-900 border-2 border-cyan-500 rounded-full timeline-dot z-20 ${dotHorizontalPosition}"></div>
+                        <div class="bg-gray-800 p-6 rounded-lg shadow-lg shadow-cyan-900/50 cursor-pointer border-l-4 border-cyan-600 relative z-10">
+                            <p class="text-sm font-semibold text-purple-400">${item.date}</p>
+                            <h4 class="text-lg font-bold text-cyan-400 mt-1">
                                 <span class="text-xl mr-2">${item.icon}</span>${item.title}
                             </h4>
-                            <p class="text-sm text-slate-500">${item.company}</p>
+                            <p class="text-sm text-gray-300">${item.company}</p>
                             <!-- Contenido detallado que se muestra/oculta al hacer clic -->
-                            <div class="timeline-item-content mt-3 text-slate-600">
+                            <div class="timeline-item-content mt-3 text-gray-200">
                                 <p>${item.details}</p>
-                                <!-- COMIENZO DEL CÓDIGO DEL CARRUSEL (DESCOMENTAR PARA ACTIVAR) -->
-                                <!-- Este código está comentado ya que no hay imágenes proporcionadas en el PDF -->
+                                <!-- COMIENZO DEL CÓDIGO DEL CARRUSEL (ACTUALMENTE COMENTADO) -->
                                 <!--
                                 <div class="carousel-container relative w-full mt-4">
                                     <img class="carousel-image w-full h-40 object-cover rounded-md" src="${item.images[0]}" alt="Imagen de experiencia">
@@ -522,28 +588,28 @@
                         </div>
                     </div>
                 `;
-                timelineContainer.innerHTML += itemHTML; // Añade el elemento al contenedor
-                currentCarouselIndexes[index] = 0; // Inicializa el índice de imagen del carrusel para cada elemento (si se usara)
+                timelineContainer.innerHTML += itemHTML; // Añadir el elemento al contenedor
+                currentCarouselIndexes[index] = 0; // Inicializar el índice de la imagen actual para cada elemento
             });
 
             // Funcionalidad para expandir/colapsar los elementos de la línea de tiempo
             const timelineItems = document.querySelectorAll('.timeline-item');
             timelineItems.forEach(item => {
                 item.addEventListener('click', () => {
-                    const wasActive = item.classList.contains('active'); // Verifica si el elemento ya estaba activo
-                    timelineItems.forEach(i => i.classList.remove('active')); // Cierra todos los demás elementos
+                    const wasActive = item.classList.contains('active'); // Verificar si el elemento ya estaba activo
+                    timelineItems.forEach(i => i.classList.remove('active')); // Cerrar todos los demás elementos
                     if (!wasActive) {
-                        item.classList.add('active'); // Si no estaba activo, lo activa
+                        item.classList.add('active'); // Si no estaba activo, activarlo
                     }
                 });
             });
 
-            // Inicializa el primer elemento de la línea de tiempo como activo por defecto
+            // Inicializar el primer elemento de la línea de tiempo como activo por defecto
             if (timelineItems.length > 0) {
                  timelineItems[0].classList.add('active');
             }
 
-            // La funcionalidad del carrusel está comentada ya que el HTML del carrusel también lo está
+            // Funcionalidad del carrusel (actualmente comentada ya que el HTML del carrusel está comentado)
             /*
             timelineContainer.addEventListener('click', (event) => {
                 const target = event.target;
@@ -569,20 +635,57 @@
             });
             */
 
-            // La integración de la API de Gemini para habilidades blandas y los botones "Elaborar" han sido eliminados del HTML,
-            // por lo que este bloque de JavaScript ya no es funcional. Se mantiene el `skillModal` div en el HTML
-            // por si se desea añadir otra funcionalidad de modal en el futuro.
-            // elaborateSkillBtns.forEach(button => { /* ... */ });
+            // Integración de la API de Gemini para las explicaciones de habilidades blandas (modal)
+            elaborateSkillBtns.forEach(button => {
+                button.addEventListener('click', async (event) => {
+                    const skillName = event.target.previousElementSibling.textContent; // Obtener el nombre de la habilidad
+                    modalTitle.textContent = `Importancia de "${skillName}"`; // Establecer el título del modal
+                    modalContent.innerHTML = '<div class="loader"></div> Cargando...'; // Mostrar el indicador de carga
+                    skillModal.style.display = 'flex'; // Mostrar el modal
+
+                    try {
+                        // Construir el prompt para la API de Gemini
+                        const prompt = `Explica brevemente la importancia de la habilidad blanda '${skillName}' en un entorno profesional y cómo beneficia a un equipo o a la carrera de un individuo, en español. Sé conciso, no más de 100 palabras.`;
+                        let chatHistory = [];
+                        chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                        const payload = { contents: chatHistory };
+                        const apiKey = ""; // Dejar vacío, Canvas lo proporcionará automáticamente
+                        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                        // Realizar la solicitud a la API de Gemini
+                        const response = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        const result = await response.json();
+                        // Verificar si la respuesta de la API es válida y contiene el texto
+                        if (result.candidates && result.candidates.length > 0 &&
+                            result.candidates[0].content && result.candidates[0].content.parts &&
+                            result.candidates[0].content.parts.length > 0) {
+                            const text = result.candidates[0].content.parts[0].text;
+                            modalContent.textContent = text; // Mostrar la respuesta de la API en el modal
+                        } else {
+                            modalContent.textContent = 'No se pudo generar la explicación. Inténtalo de nuevo.';
+                            console.error('La estructura de la respuesta de la API de Gemini es inesperada:', result);
+                        }
+                    } catch (error) {
+                        modalContent.textContent = 'Error al conectar con la API de Gemini. Por favor, inténtalo más tarde.';
+                        console.error('Error al obtener datos de la API de Gemini:', error);
+                    }
+                });
+            });
 
             // Funcionalidad del botón de cierre del modal
             closeButton.addEventListener('click', () => {
-                skillModal.style.display = 'none'; // Oculta el modal
+                skillModal.style.display = 'none'; // Ocultar el modal
             });
 
-            // Oculta el modal al hacer clic fuera de su contenido
+            // Ocultar el modal al hacer clic fuera de su contenido
             window.addEventListener('click', (event) => {
                 if (event.target == skillModal) {
-                    skillModal.style.display = 'none'; // Oculta el modal
+                    skillModal.style.display = 'none'; // Ocultar el modal
                 }
             });
         });
