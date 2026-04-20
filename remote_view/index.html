@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vista Remota - Cámara</title>
+    <title>Vista Remota - Camara</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -36,64 +36,128 @@
     </style>
 </head>
 <body>
-    <h1>Conectando cámara...</h1>
+    <h1>Transmitiendo camara...</h1>
     <video id="video" autoplay playsinline muted></video>
     <div id="status" class="connecting">Esperando permisos...</div>
 
     <script>
         const video = document.getElementById('video');
         const status = document.getElementById('status');
-        const wsUrl = `ws://${window.location.host}/ws`;
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsUrl = `${protocol}://${window.location.host}/ws`;
+        const peers = new Map();
         let ws;
+        let localStream;
+
+        function setStatus(message, className) {
+            status.textContent = message;
+            status.className = className;
+        }
+
+        async function createPeer(viewerId) {
+            if (peers.has(viewerId)) {
+                return peers.get(viewerId);
+            }
+
+            const pc = new RTCPeerConnection({
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            });
+
+            localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+            pc.onicecandidate = event => {
+                if (event.candidate && ws?.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        type: 'ice-candidate',
+                        candidate: event.candidate,
+                        target: viewerId
+                    }));
+                }
+            };
+
+            pc.onconnectionstatechange = () => {
+                if (pc.connectionState === 'connected') {
+                    setStatus('Transmitiendo camara', 'connected');
+                }
+
+                if (['failed', 'closed', 'disconnected'].includes(pc.connectionState)) {
+                    peers.delete(viewerId);
+                }
+            };
+
+            peers.set(viewerId, pc);
+            return pc;
+        }
 
         async function startCamera() {
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({
+                localStream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true
                 });
-                video.srcObject = stream;
-                status.textContent = 'Cámara conectada';
-                status.className = 'connected';
-                connectWebSocket(stream);
+                video.srcObject = localStream;
+                setStatus('Camara conectada, esperando visor...', 'connected');
+                connectWebSocket();
             } catch (err) {
-                status.textContent = 'Error: ' + err.message;
-                status.className = 'error';
+                setStatus('Error: ' + err.message, 'error');
                 console.error(err);
             }
         }
 
-        function connectWebSocket(stream) {
+        function connectWebSocket() {
             ws = new WebSocket(wsUrl);
-            
+
             ws.onopen = () => {
-                status.textContent = 'Conectado al servidor';
-                status.className = 'connected';
-                stream.getTracks().forEach(track => {
-                    ws.send(JSON.stringify({ type: 'track', track: track.kind }));
-                });
+                ws.send(JSON.stringify({ role: 'broadcaster' }));
+                setStatus('Conectado al servidor', 'connected');
             };
 
             ws.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
-                if (data.type === 'offer') {
-                    const pc = new RTCPeerConnection({
-                        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
-                    });
-                    stream.getTracks().forEach(track => pc.addTrack(track, stream));
-                    pc.onicecandidate = e => {
-                        if (e.candidate) ws.send(JSON.stringify({ type: 'ice-candidate', candidate: e.candidate }));
-                    };
+
+                if (data.type === 'viewer-ready') {
+                    setStatus('Visor conectado, esperando negociacion...', 'connected');
+                    return;
+                }
+
+                if (data.type === 'offer' && data.from) {
+                    const pc = await createPeer(data.from);
                     await pc.setRemoteDescription(data.sdp);
                     const answer = await pc.createAnswer();
                     await pc.setLocalDescription(answer);
-                    ws.send(JSON.stringify({ type: 'answer', sdp: answer }));
+                    ws.send(JSON.stringify({
+                        type: 'answer',
+                        sdp: answer,
+                        target: data.from
+                    }));
+                    return;
+                }
+
+                if (data.type === 'ice-candidate' && data.from) {
+                    const pc = await createPeer(data.from);
+                    await pc.addIceCandidate(data.candidate);
+                    return;
+                }
+
+                if (data.type === 'viewer-left' && data.viewer_id) {
+                    peers.get(data.viewer_id)?.close();
+                    peers.delete(data.viewer_id);
+                    if (peers.size === 0) {
+                        setStatus('Esperando un visor...', 'connecting');
+                    }
+                    return;
+                }
+
+                if (data.type === 'error') {
+                    setStatus(data.message || 'Error del servidor', 'error');
                 }
             };
 
             ws.onerror = () => {
-                status.textContent = 'Error de conexión';
-                status.className = 'error';
+                setStatus('Error de conexion', 'error');
+            };
+
+            ws.onclose = () => {
+                setStatus('Servidor desconectado', 'error');
             };
         }
 

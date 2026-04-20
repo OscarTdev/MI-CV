@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ver Cámara Remota</title>
+    <title>Ver Camara Remota</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -36,19 +36,31 @@
     </style>
 </head>
 <body>
-    <h1>Ver cámara remota</h1>
+    <h1>Ver camara remota</h1>
     <video id="video" autoplay playsinline></video>
     <div id="status" class="waiting">Conectando...</div>
 
     <script>
         const video = document.getElementById('video');
         const status = document.getElementById('status');
-        const wsUrl = `ws://${window.location.host}/ws`;
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const wsUrl = `${protocol}://${window.location.host}/ws`;
+        let ws;
         let pc;
         let remoteStream = new MediaStream();
 
-        async function connectWebSocket() {
-            const ws = new WebSocket(wsUrl);
+        function setStatus(message, className) {
+            status.textContent = message;
+            status.className = className;
+        }
+
+        function resetPeer() {
+            if (pc) {
+                pc.close();
+            }
+
+            remoteStream = new MediaStream();
+            video.srcObject = remoteStream;
             pc = new RTCPeerConnection({
                 iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
             });
@@ -58,43 +70,76 @@
                     remoteStream.addTrack(track);
                 });
                 video.srcObject = remoteStream;
-                status.textContent = 'Recibiendo cámara';
-                status.className = 'connected';
+                setStatus('Recibiendo camara', 'connected');
             };
 
-            pc.onicecandidate = e => {
-                if (e.candidate) {
-                    ws.send(JSON.stringify({ type: 'ice-candidate', candidate: e.candidate }));
+            pc.onicecandidate = event => {
+                if (event.candidate && ws?.readyState === WebSocket.OPEN) {
+                    ws.send(JSON.stringify({
+                        type: 'ice-candidate',
+                        candidate: event.candidate
+                    }));
                 }
             };
 
+            pc.onconnectionstatechange = () => {
+                if (['failed', 'closed', 'disconnected'].includes(pc.connectionState)) {
+                    setStatus('Conexion reiniciando...', 'waiting');
+                }
+            };
+        }
+
+        async function startConnection() {
+            resetPeer();
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            ws.send(JSON.stringify({ type: 'offer', sdp: offer }));
+        }
+
+        async function connectWebSocket() {
+            ws = new WebSocket(wsUrl);
+
             ws.onopen = () => {
-                status.textContent = 'Conectado, esperando video...';
-                startConnection(ws);
+                ws.send(JSON.stringify({ role: 'viewer' }));
+                setStatus('Conectado, esperando camara...', 'waiting');
             };
 
             ws.onmessage = async (event) => {
                 const data = JSON.parse(event.data);
-                if (data.type === 'offer') {
+
+                if (data.type === 'waiting-broadcaster') {
+                    setStatus('Esperando a que la camara se conecte...', 'waiting');
+                    return;
+                }
+
+                if (data.type === 'broadcaster-ready') {
+                    setStatus('Camara detectada, iniciando conexion...', 'waiting');
+                    await startConnection();
+                    return;
+                }
+
+                if (data.type === 'answer') {
                     await pc.setRemoteDescription(data.sdp);
-                    const answer = await pc.createAnswer();
-                    await pc.setLocalDescription(answer);
-                    ws.send(JSON.stringify({ type: 'answer', sdp: answer }));
-                } else if (data.type === 'ice-candidate') {
+                    return;
+                }
+
+                if (data.type === 'ice-candidate') {
                     await pc.addIceCandidate(data.candidate);
+                    return;
+                }
+
+                if (data.type === 'error') {
+                    setStatus(data.message || 'Error del servidor', 'error');
                 }
             };
 
             ws.onerror = () => {
-                status.textContent = 'Error de conexión';
-                status.className = 'error';
+                setStatus('Error de conexion', 'error');
             };
-        }
 
-        async function startConnection(ws) {
-            const offer = await pc.createOffer();
-            await pc.setLocalDescription(offer);
-            ws.send(JSON.stringify({ type: 'offer', sdp: offer }));
+            ws.onclose = () => {
+                setStatus('Servidor desconectado', 'error');
+            };
         }
 
         connectWebSocket();

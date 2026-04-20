@@ -260,32 +260,112 @@ document.addEventListener('DOMContentLoaded', function() {
     let handModel = null;
     let stream = null;
     let pinchLocked = false;
+    let handSocket = null;
+    let lastScrollAt = 0;
+    const handCanvasCtx = handCanvas.getContext('2d');
+    const frameImage = new Image();
 
     const connections = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
 
-    async function loadModel() {
-        gestureStatus.textContent = 'Cargando modelo...';
-        
-        try {
-            const Hands = await import('https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/+esm');
-            const hs = Hands.default;
-            
-            handModel = new hs({
-                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-            });
-            
-            handModel.setOptions({
-                maxNumHands: 1,
-                minDetectionConfidence: 0.7,
-                minTrackingConfidence: 0.5
-            });
-            
-            handModel.onResults(onResults);
-            gestureStatus.textContent = 'Modelo listo';
-        } catch (e) {
-            gestureStatus.textContent = 'Error: ' + e.message;
-            console.error(e);
+    frameImage.addEventListener('load', () => {
+        handCanvasCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
+        handCanvasCtx.drawImage(frameImage, 0, 0, handCanvas.width, handCanvas.height);
+    });
+
+    function updateCursorPosition(cursorX, cursorY) {
+        const x = (cursorX / 100) * window.innerWidth;
+        const y = (cursorY / 100) * window.innerHeight;
+        handCursor.style.left = (x - 16) + 'px';
+        handCursor.style.top = (y - 16) + 'px';
+        return { x, y };
+    }
+
+    function updateGestureLabel(gesture) {
+        const labels = {
+            connected: 'Servidor conectado',
+            pointer: 'Mover cursor',
+            click: 'Clic',
+            scroll_up: 'Scroll arriba',
+            scroll_down: 'Scroll abajo',
+            fist: 'Idle',
+            waiting: 'Sin mano',
+            stopped: 'Detenido'
+        };
+
+        gestureStatus.textContent = labels[gesture] || gesture || 'Esperando...';
+    }
+
+    function applyGestureState(state) {
+        if (!state) return;
+
+        const { x, y } = updateCursorPosition(state.cursor_x ?? 50, state.cursor_y ?? 50);
+        updateGestureLabel(state.gesture);
+
+        if (state.click) {
+            if (!pinchLocked) {
+                document.elementFromPoint(x, y)?.click();
+                pinchLocked = true;
+            }
+        } else {
+            pinchLocked = false;
         }
+
+        if (state.scroll) {
+            const now = Date.now();
+            if (now - lastScrollAt > 60) {
+                window.scrollBy(0, state.scroll * 12);
+                lastScrollAt = now;
+            }
+        }
+    }
+
+    async function loadModel() {
+        gestureStatus.textContent = 'Conectando con la camara...';
+        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+
+        await new Promise((resolve, reject) => {
+            const socket = new WebSocket(`${protocol}://127.0.0.1:8000/connect`);
+
+            socket.addEventListener('open', () => {
+                handSocket = socket;
+                handModel = { connected: true };
+                updateGestureLabel('connected');
+                socket.send(JSON.stringify({ action: 'start' }));
+                resolve();
+            });
+
+            socket.addEventListener('message', (event) => {
+                try {
+                    const payload = JSON.parse(event.data);
+
+                    if (payload.frame) {
+                        frameImage.src = `data:image/jpeg;base64,${payload.frame}`;
+                    }
+
+                    if (payload.status === 'error') {
+                        const errorMessage = payload.message || 'Error en el servidor';
+                        stopHandControlFunc(false);
+                        gestureStatus.textContent = errorMessage;
+                        return;
+                    }
+
+                    applyGestureState(payload.gesture_state);
+                } catch (error) {
+                    console.error('Error procesando hand control:', error);
+                }
+            });
+
+            socket.addEventListener('close', () => {
+                if (isActive) {
+                    gestureStatus.textContent = 'Conexion cerrada';
+                    stopHandControlFunc(false);
+                }
+            });
+
+            socket.addEventListener('error', () => {
+                reject(new Error('No se pudo conectar con el servidor de mano en http://127.0.0.1:8000'));
+            });
+        });
     }
 
     function onResults(results) {
@@ -397,6 +477,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function startHandControl() {
+        stream = null;
+        if (videoEl) {
+            videoEl.removeAttribute('src');
+            videoEl.load();
+        }
+        return;
         try {
             gestureStatus.textContent = 'Pidiendo cámara...';
             
@@ -421,8 +507,18 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function stopHandControlFunc() {
+    function stopHandControlFunc(notifyServer = true) {
         isActive = false;
+        handModel = null;
+        lastScrollAt = 0;
+        pinchLocked = false;
+        if (notifyServer && handSocket && handSocket.readyState === WebSocket.OPEN) {
+            handSocket.send(JSON.stringify({ action: 'stop' }));
+        }
+        if (handSocket) {
+            handSocket.close();
+            handSocket = null;
+        }
         if (stream) {
             stream.getTracks().forEach(t => t.stop());
             stream = null;
@@ -435,6 +531,7 @@ document.addEventListener('DOMContentLoaded', function() {
         handControlBtn.classList.remove('bg-red-600');
         handControlBtn.classList.add('bg-purple-600');
         gestureStatus.textContent = 'Detenido';
+        handCanvasCtx.clearRect(0, 0, handCanvas.width, handCanvas.height);
     }
 
     handControlBtn.addEventListener('click', () => {
@@ -458,10 +555,16 @@ document.addEventListener('DOMContentLoaded', function() {
         handCursor.classList.remove('hidden');
         handControlBtn.classList.remove('bg-purple-600');
         handControlBtn.classList.add('bg-red-600');
-        
-        await loadModel();
         isActive = true;
-        await startHandControl();
+
+        try {
+            await loadModel();
+            await startHandControl();
+        } catch (error) {
+            console.error(error);
+            stopHandControlFunc(false);
+            gestureStatus.textContent = error.message;
+        }
     }
 
     stopHandControl.addEventListener('click', stopHandControlFunc);
