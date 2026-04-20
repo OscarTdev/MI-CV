@@ -263,6 +263,29 @@
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="w-7 h-7">
     </a>
 
+    <!-- Botón flotante de Control por Mano -->
+    <button id="handControlBtn" class="fixed bottom-6 right-20 bg-purple-600 hover:bg-purple-700 p-3 rounded-full shadow-lg shadow-purple-500/50 hover:shadow-purple-500/80 transition-all duration-300 hover:scale-110 z-50" aria-label="Activar control por mano">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"/>
+        </svg>
+    </button>
+
+    <!-- Preview de cámara (oculto por defecto) -->
+    <div id="cameraPreview" class="fixed top-4 right-4 w-48 h-36 bg-gray-900 rounded-lg shadow-lg z-50 hidden border-2 border-purple-500 overflow-hidden">
+        <video id="handVideo" class="w-full h-full object-cover" autoplay playsinline muted></video>
+        <div class="absolute bottom-1 left-1 right-1 flex justify-between items-center">
+            <span id="gestureStatus" class="text-xs text-purple-400 bg-black/50 px-2 py-1 rounded">Iniciando...</span>
+            <button id="stopHandControl" class="text-xs bg-red-500 hover:bg-red-600 px-2 py-1 rounded text-white">✕</button>
+        </div>
+    </div>
+
+    <!-- Cursor personalizado (oculto por defecto) -->
+    <div id="handCursor" class="fixed w-8 h-8 pointer-events-none z-40 hidden">
+        <svg viewBox="0 0 24 24" fill="none" class="w-full h-full">
+            <path d="M4 4L10.5 20.5L13 13L20.5 10.5L4 4Z" fill="#00FFFF" stroke="#00FFFF" stroke-width="1"/>
+        </svg>
+    </div>
+
     <!-- Modal para las explicaciones de habilidades blandas -->
     <div id="skillModal" class="modal">
         <div class="modal-content">

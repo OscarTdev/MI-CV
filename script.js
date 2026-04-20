@@ -244,4 +244,91 @@ document.addEventListener('DOMContentLoaded', function() {
             skillModal.style.display = 'none';
         }
     });
+
+    const handControlBtn = document.getElementById('handControlBtn');
+    const cameraPreview = document.getElementById('cameraPreview');
+    const handVideo = document.getElementById('handVideo');
+    const gestureStatus = document.getElementById('gestureStatus');
+    const stopHandControl = document.getElementById('stopHandControl');
+    const handCursor = document.getElementById('handCursor');
+
+    let ws = null;
+    let isActive = false;
+
+    async function connectHandControl() {
+        ws = new WebSocket('ws://localhost:8000/connect');
+
+        ws.onopen = () => {
+            ws.send(JSON.stringify({ action: 'start' }));
+        };
+
+        ws.onmessage = async (event) => {
+            const data = JSON.parse(event.data);
+
+            if (data.status === 'tracking') {
+                handVideo.src = 'data:image/jpeg;base64,' + data.frame;
+
+                const state = data.gesture_state;
+                gestureStatus.textContent = state.gesture || 'Esperando...';
+
+                if (state.cursor_x !== undefined) {
+                    const x = (state.cursor_x / 100) * window.innerWidth;
+                    const y = (state.cursor_y / 100) * window.innerHeight;
+                    handCursor.style.left = x + 'px';
+                    handCursor.style.top = y + 'px';
+                }
+
+                if (state.click) {
+                    document.elementFromPoint(
+                        (state.cursor_x / 100) * window.innerWidth,
+                        (state.cursor_y / 100) * window.innerHeight
+                    )?.click();
+                }
+
+                if (state.scroll !== 0) {
+                    window.scrollBy(0, state.scroll * 10);
+                }
+            } else if (data.status === 'stopped') {
+                stopHandControlFunc();
+            }
+        };
+
+        ws.onerror = () => {
+            gestureStatus.textContent = 'Error de conexión';
+        };
+    }
+
+    function stopHandControlFunc() {
+        if (ws) {
+            ws.send(JSON.stringify({ action: 'stop' }));
+            ws.close();
+            ws = null;
+        }
+        isActive = false;
+        cameraPreview.classList.add('hidden');
+        handCursor.classList.add('hidden');
+        handControlBtn.classList.remove('bg-red-600');
+        handControlBtn.classList.add('bg-purple-600');
+    }
+
+    handControlBtn.addEventListener('click', async () => {
+        if (!isActive) {
+            isActive = true;
+            cameraPreview.classList.remove('hidden');
+            handCursor.classList.remove('hidden');
+            handControlBtn.classList.remove('bg-purple-600');
+            handControlBtn.classList.add('bg-red-600');
+            gestureStatus.textContent = 'Conectando...';
+            try {
+                await connectHandControl();
+            } catch (e) {
+                gestureStatus.textContent = 'Error: ¿Servidor activo?';
+                stopHandControlFunc();
+            }
+        } else {
+            stopHandControlFunc();
+        }
+    });
+
+    stopHandControl.addEventListener('click', stopHandControlFunc);
 });
