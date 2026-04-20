@@ -251,8 +251,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const gestureStatus = document.getElementById('gestureStatus');
     const stopHandControl = document.getElementById('stopHandControl');
     const handCursor = document.getElementById('handCursor');
+    const handTutorial = document.getElementById('handTutorial');
+    const startHandControlBtn = document.getElementById('startHandControl');
 
     let isActive = false;
+    let isFirstTime = true;
     let handModel = null;
     let videoEl = null;
     let stream = null;
@@ -261,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const connections = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
 
     async function loadModel() {
-        gestureStatus.textContent = 'Cargando...';
+        gestureStatus.textContent = 'Cargando modelo...';
         
         try {
             const Hands = await import('https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/+esm');
@@ -315,34 +318,34 @@ document.addEventListener('DOMContentLoaded', function() {
             handCursor.style.top = (y - 16) + 'px';
 
             if (idxExt && midExt) {
-                gestureStatus.textContent = 'pointer';
+                gestureStatus.textContent = '☝️+🖖 Mover cursor';
             } else if (dist < 0.05) {
                 if (!pinchLocked) {
                     document.elementFromPoint(x, y)?.click();
                     pinchLocked = true;
                 }
-                gestureStatus.textContent = 'click';
+                gestureStatus.textContent = '🤏 Clic!';
             } else {
                 if (dist > 0.08) pinchLocked = false;
                 if (idxExt && !midExt) {
                     window.scrollBy(0, -15);
-                    gestureStatus.textContent = '↑ scroll';
+                    gestureStatus.textContent = '☝️ Scroll ↑';
                 } else if (!idxExt && midExt) {
                     window.scrollBy(0, 15);
-                    gestureStatus.textContent = '↓ scroll';
+                    gestureStatus.textContent = '🖖 Scroll ↓';
                 } else {
-                    gestureStatus.textContent = 'idle';
+                    gestureStatus.textContent = '✊ Idle';
                 }
             }
         } else {
-            gestureStatus.textContent = 'sin mano';
+            gestureStatus.textContent = '👀 Sin mano';
         }
         
         ctx.restore();
         
         setTimeout(() => {
             if (isActive && videoEl) processFrame();
-        }, 30);
+        }, 50);
     }
 
     function drawHand(ctx, lm) {
@@ -378,6 +381,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function startHandControl() {
         try {
+            gestureStatus.textContent = 'Abriendo cámara...';
+            
             stream = await navigator.mediaDevices.getUserMedia({
                 video: { width: 320, height: 240, facingMode: 'user' }
             });
@@ -389,8 +394,15 @@ document.addEventListener('DOMContentLoaded', function() {
             
             videoEl.onloadedmetadata = () => {
                 videoEl.play().then(() => {
+                    gestureStatus.textContent = '🎯 Listo!';
                     processFrame();
+                }).catch(e => {
+                    gestureStatus.textContent = 'Error: ' + e.message;
                 });
+            };
+            
+            videoEl.onerror = () => {
+                gestureStatus.textContent = 'Error de video';
             };
         } catch (e) {
             console.error(e);
@@ -413,20 +425,73 @@ document.addEventListener('DOMContentLoaded', function() {
         gestureStatus.textContent = 'Detenido';
     }
 
-    handControlBtn.addEventListener('click', async () => {
-        if (!isActive) {
-            await loadModel();
-            isActive = true;
-            cameraPreview.classList.remove('hidden');
-            handCursor.classList.remove('hidden');
-            handControlBtn.classList.remove('bg-purple-600');
-            handControlBtn.classList.add('bg-red-600');
-            gestureStatus.textContent = 'Iniciando...';
-            await startHandControl();
-        } else {
+    handControlBtn.addEventListener('click', () => {
+        if (isActive) {
             stopHandControlFunc();
+        } else if (isFirstTime) {
+            handTutorial.classList.remove('hidden');
+        } else {
+            activateHandControl();
         }
     });
 
+    startHandControlBtn?.addEventListener('click', () => {
+        handTutorial.classList.add('hidden');
+        isFirstTime = false;
+        activateHandControl();
+    });
+
+    async function activateHandControl() {
+        cameraPreview.classList.remove('hidden');
+        handCursor.classList.remove('hidden');
+        handControlBtn.classList.remove('bg-purple-600');
+        handControlBtn.classList.add('bg-red-600');
+        
+        await loadModel();
+        isActive = true;
+        await startHandControl();
+    }
+
     stopHandControl.addEventListener('click', stopHandControlFunc);
+
+    const cameraHeader = document.getElementById('cameraHeader');
+    let isDragging = false, dragOffsetX = 0, dragOffsetY = 0;
+
+    cameraHeader?.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        dragOffsetX = e.clientX - cameraPreview.offsetLeft;
+        dragOffsetY = e.clientY - cameraPreview.offsetTop;
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (isDragging) {
+            cameraPreview.style.left = (e.clientX - dragOffsetX) + 'px';
+            cameraPreview.style.top = (e.clientY - dragOffsetY) + 'px';
+            cameraPreview.style.right = 'auto';
+        }
+    });
+
+    document.addEventListener('mouseup', () => isDragging = false);
+
+    let touchStartX, touchStartY, touchStartLeft, touchStartTop;
+    cameraHeader?.addEventListener('touchstart', (e) => {
+        const t = e.touches[0];
+        touchStartX = t.clientX;
+        touchStartY = t.clientY;
+        touchStartLeft = cameraPreview.offsetLeft;
+        touchStartTop = cameraPreview.offsetTop;
+    });
+
+    document.addEventListener('touchmove', (e) => {
+        if (touchStartX !== undefined) {
+            const t = e.touches[0];
+            cameraPreview.style.left = (touchStartLeft + t.clientX - touchStartX) + 'px';
+            cameraPreview.style.top = (touchStartTop + t.clientY - touchStartY) + 'px';
+            cameraPreview.style.right = 'auto';
+        }
+    });
+
+    document.addEventListener('touchend', () => {
+        touchStartX = undefined;
+    });
 });
