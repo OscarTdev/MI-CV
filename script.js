@@ -264,6 +264,14 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastScrollAt = 0;
     const handCanvasCtx = handCanvas.getContext('2d');
     const frameImage = new Image();
+    const HAND_CONTROL_HOST = window.HAND_CONTROL_HOST || '192.168.40.7';
+    const HAND_CONTROL_PORT = window.HAND_CONTROL_PORT || '8000';
+    const frameCanvas = document.createElement('canvas');
+    const frameCtx = frameCanvas.getContext('2d');
+    let frameLoopId = null;
+
+    frameCanvas.width = 320;
+    frameCanvas.height = 240;
 
     const connections = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
 
@@ -320,17 +328,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function loadModel() {
-        gestureStatus.textContent = 'Conectando con la camara...';
+        gestureStatus.textContent = 'Conectando al servidor...';
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
 
         await new Promise((resolve, reject) => {
-            const socket = new WebSocket(`${protocol}://127.0.0.1:8000/connect`);
+            const socket = new WebSocket(`${protocol}://${HAND_CONTROL_HOST}:${HAND_CONTROL_PORT}/connect`);
 
             socket.addEventListener('open', () => {
                 handSocket = socket;
                 handModel = { connected: true };
+                socket.send(JSON.stringify({ role: 'controller' }));
                 updateGestureLabel('connected');
-                socket.send(JSON.stringify({ action: 'start' }));
                 resolve();
             });
 
@@ -363,7 +371,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             socket.addEventListener('error', () => {
-                reject(new Error('No se pudo conectar con el servidor de mano en http://127.0.0.1:8000'));
+                reject(new Error(`No se pudo conectar con el servidor de mano en http://${HAND_CONTROL_HOST}:${HAND_CONTROL_PORT}`));
             });
         });
     }
@@ -456,35 +464,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function processFrame() {
-        if (!isActive || !videoEl || !handModel) return;
-        
-        if (videoEl.readyState < 2) {
-            requestAnimationFrame(processFrame);
+        if (!isActive || !videoEl || !handModel || !handSocket || handSocket.readyState !== WebSocket.OPEN) {
+            frameLoopId = null;
             return;
         }
         
-        const tmpCanvas = document.createElement('canvas');
-        tmpCanvas.width = 320;
-        tmpCanvas.height = 240;
-        const tmpCtx = tmpCanvas.getContext('2d');
-        tmpCtx.drawImage(videoEl, 0, 0, 320, 240);
+        if (videoEl.readyState < 2) {
+            frameLoopId = window.setTimeout(processFrame, 120);
+            return;
+        }
         
         try {
-            handModel.send({ image: tmpCanvas });
+            frameCtx.drawImage(videoEl, 0, 0, frameCanvas.width, frameCanvas.height);
+            handSocket.send(JSON.stringify({
+                action: 'frame',
+                frame: frameCanvas.toDataURL('image/jpeg', 0.7)
+            }));
         } catch(e) {
             console.error(e);
         }
+
+        frameLoopId = window.setTimeout(processFrame, 90);
     }
 
     async function startHandControl() {
-        stream = null;
-        if (videoEl) {
-            videoEl.removeAttribute('src');
-            videoEl.load();
-        }
-        return;
         try {
-            gestureStatus.textContent = 'Pidiendo cámara...';
+            gestureStatus.textContent = 'Pidiendo camara...';
             
             stream = await navigator.mediaDevices.getUserMedia({
                 video: { width: 320, height: 240, facingMode: 'user' }
@@ -497,9 +502,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             await videoEl.play();
             
-            gestureStatus.textContent = '🎯 Procesando...';
+            gestureStatus.textContent = 'Procesando...';
             
-            setTimeout(processFrame, 500);
+            if (frameLoopId) {
+                clearTimeout(frameLoopId);
+            }
+            frameLoopId = window.setTimeout(processFrame, 250);
         } catch (e) {
             console.error(e);
             gestureStatus.textContent = 'Error: ' + e.message;
@@ -512,6 +520,10 @@ document.addEventListener('DOMContentLoaded', function() {
         handModel = null;
         lastScrollAt = 0;
         pinchLocked = false;
+        if (frameLoopId) {
+            clearTimeout(frameLoopId);
+            frameLoopId = null;
+        }
         if (notifyServer && handSocket && handSocket.readyState === WebSocket.OPEN) {
             handSocket.send(JSON.stringify({ action: 'stop' }));
         }
