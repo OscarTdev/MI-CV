@@ -131,6 +131,17 @@ document.addEventListener('DOMContentLoaded', function() {
             ]
         },
         {
+            date: '2018 - 2019',
+            title: 'Técnico en Electricidad',
+            icon: '⚡',
+            company: 'Electricidad y Refrigeración Torres',
+            side: 'left',
+            details: 'Técnico en instalaciones eléctricas residenciales y comerciales, mantenimiento preventivo y correctivo, lectura de planos eléctricos.',
+            images: [
+                'https://placehold.co/400x250/fde047/ca8a04?text=Electricidad+1'
+            ]
+        },
+        {
             date: '2019 - 2021',
             title: 'Técnico en Construcción',
             icon: '🏗️',
@@ -140,17 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
             images: [
                 'https://placehold.co/400x250/a3e635/65a30d?text=Construcción+1',
                 'https://placehold.co/400x250/d9f99d/65a30d?text=Construcción+2'
-            ]
-        },
-        {
-            date: '2018 - 2019',
-            title: 'Técnico en Electricidad',
-            icon: '⚡',
-            company: 'Electricidad y Refrigeración Torres',
-            side: 'left',
-            details: 'Técnico en instalaciones eléctricas residenciales y comerciales, mantenimiento preventivo y correctivo, lectura de planos eléctricos.',
-            images: [
-                'https://placehold.co/400x250/fde047/ca8a04?text=Electricidad+1'
             ]
         }
     ];
