@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
             date: '2025 - Actualmente',
             title: 'Desarrollador de Software (Independiente)',
             icon: '💻',
-            company: 'Proyectos Personales / Formación Continua',
+            company: 'Freelance / Proyectos Personales',
             side: 'left',
             details: 'Aprendiendo los fundamentos del software para aplicar todas las etapas del ciclo de desarrollo: análisis de requisitos, diseño, desarrollo, pruebas, despliegue y mantenimiento. Enfoque como desarrollador independiente para crear soluciones completas.',
             images: [
@@ -105,15 +105,16 @@ document.addEventListener('DOMContentLoaded', function() {
             ]
         },
         {
-            date: 'Dic 2024 - Actualmente',
-            title: 'Desarrollador Independiente',
-            icon: '⚡',
+            date: '2024 - Actualmente',
+            title: 'Técnico en Sistemas de Alarmas y CCTV',
+            icon: '📹',
             company: 'Freelance (Independiente)',
             side: 'right',
-            details: 'Desarrollador independiente enfocándome en el ciclo completo de desarrollo de software. Aprendizaje continuo en análisis, diseño, desarrollo, pruebas y mantenimiento de aplicaciones.',
+            details: 'Instalación, configuración y mantenimiento de sistemas de alarmas y cámaras de videovigilancia CCTV. Diseño de soluciones de seguridad para hogares y pequeñas empresas, incluyendo configuración de DVR/NVR, monitoreo remoto y soporte técnico especializado.',
             images: [
-                'https://placehold.co/400x250/60a5fa/2563eb?text=Desarrollo+Independiente+1',
-                'https://placehold.co/400x250/93c5fd/2563eb?text=Desarrollo+Independiente+2'
+                'https://placehold.co/400x250/60a5fa/2563eb?text=Sistemas+Alarmas+1',
+                'https://placehold.co/400x250/93c5fd/2563eb?text=Sistemas+Alarmas+2',
+                'https://placehold.co/400x250/60a5fa/2563eb?text=CCTV+1'
             ]
         },
         {
@@ -143,11 +144,11 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         {
             date: '2018 - 2019',
-            title: 'Aprendiz de Electricidad',
-            icon: '🔌',
+            title: 'Técnico en Electricidad',
+            icon: '⚡',
             company: 'Electricidad y Refrigeración Torres',
             side: 'left',
-            details: 'Aprendizaje en instalaciones eléctricas residenciales y comerciales, mantenimiento preventivo y correctivo, lectura de planos eléctricos.',
+            details: 'Técnico en instalaciones eléctricas residenciales y comerciales, mantenimiento preventivo y correctivo, lectura de planos eléctricos.',
             images: [
                 'https://placehold.co/400x250/fde047/ca8a04?text=Electricidad+1'
             ]
