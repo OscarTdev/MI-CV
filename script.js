@@ -247,84 +247,182 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const handControlBtn = document.getElementById('handControlBtn');
     const cameraPreview = document.getElementById('cameraPreview');
-    const handVideo = document.getElementById('handVideo');
+    const handCanvas = document.getElementById('handCanvas');
     const gestureStatus = document.getElementById('gestureStatus');
     const stopHandControl = document.getElementById('stopHandControl');
     const handCursor = document.getElementById('handCursor');
 
-    let ws = null;
     let isActive = false;
+    let handModel = null;
+    let videoEl = null;
+    let stream = null;
+    let pinchLocked = false;
 
-    async function connectHandControl() {
-        ws = new WebSocket('ws://localhost:8000/connect');
+    const connections = [[0,1],[1,2],[2,3],[3,4],[0,5],[5,6],[6,7],[7,8],[5,9],[9,10],[10,11],[11,12],[9,13],[13,14],[14,15],[15,16],[13,17],[17,18],[18,19],[19,20],[0,17]];
 
-        ws.onopen = () => {
-            ws.send(JSON.stringify({ action: 'start' }));
-        };
+    async function loadModel() {
+        gestureStatus.textContent = 'Cargando...';
+        
+        try {
+            const Hands = await import('https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4/+esm');
+            const hs = Hands.default;
+            
+            handModel = new hs({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
+            });
+            
+            handModel.setOptions({
+                maxNumHands: 1,
+                minDetectionConfidence: 0.7,
+                minTrackingConfidence: 0.5
+            });
+            
+            handModel.onResults(onResults);
+            gestureStatus.textContent = 'Listo';
+        } catch (e) {
+            gestureStatus.textContent = 'Error: ' + e.message;
+            console.error(e);
+        }
+    }
 
-        ws.onmessage = async (event) => {
-            const data = JSON.parse(event.data);
+    function onResults(results) {
+        if (!isActive) return;
+        
+        const ctx = handCanvas.getContext('2d');
+        ctx.save();
+        
+        ctx.clearRect(0, 0, handCanvas.width, handCanvas.height);
+        
+        if (results.image) {
+            ctx.drawImage(results.image, 0, 0, handCanvas.width, handCanvas.height);
+        }
 
-            if (data.status === 'tracking') {
-                handVideo.src = 'data:image/jpeg;base64,' + data.frame;
+        if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            const lm = results.multiHandLandmarks[0];
+            drawHand(ctx, lm);
 
-                const state = data.gesture_state;
-                gestureStatus.textContent = state.gesture || 'Esperando...';
+            const idxTip = lm[8], idxPip = lm[6];
+            const midTip = lm[12], midPip = lm[10];
+            const thTip = lm[4];
 
-                if (state.cursor_x !== undefined) {
-                    const x = (state.cursor_x / 100) * window.innerWidth;
-                    const y = (state.cursor_y / 100) * window.innerHeight;
-                    handCursor.style.left = x + 'px';
-                    handCursor.style.top = y + 'px';
+            const idxExt = idxTip.y < idxPip.y;
+            const midExt = midTip.y < midPip.y;
+            const dist = Math.hypot(idxTip.x - thTip.x, idxTip.y - thTip.y);
+
+            const x = idxTip.x * window.innerWidth;
+            const y = idxTip.y * window.innerHeight;
+            handCursor.style.left = (x - 16) + 'px';
+            handCursor.style.top = (y - 16) + 'px';
+
+            if (idxExt && midExt) {
+                gestureStatus.textContent = 'pointer';
+            } else if (dist < 0.05) {
+                if (!pinchLocked) {
+                    document.elementFromPoint(x, y)?.click();
+                    pinchLocked = true;
                 }
-
-                if (state.click) {
-                    document.elementFromPoint(
-                        (state.cursor_x / 100) * window.innerWidth,
-                        (state.cursor_y / 100) * window.innerHeight
-                    )?.click();
+                gestureStatus.textContent = 'click';
+            } else {
+                if (dist > 0.08) pinchLocked = false;
+                if (idxExt && !midExt) {
+                    window.scrollBy(0, -15);
+                    gestureStatus.textContent = '↑ scroll';
+                } else if (!idxExt && midExt) {
+                    window.scrollBy(0, 15);
+                    gestureStatus.textContent = '↓ scroll';
+                } else {
+                    gestureStatus.textContent = 'idle';
                 }
-
-                if (state.scroll !== 0) {
-                    window.scrollBy(0, state.scroll * 10);
-                }
-            } else if (data.status === 'stopped') {
-                stopHandControlFunc();
             }
-        };
+        } else {
+            gestureStatus.textContent = 'sin mano';
+        }
+        
+        ctx.restore();
+        
+        setTimeout(() => {
+            if (isActive && videoEl) processFrame();
+        }, 30);
+    }
 
-        ws.onerror = () => {
-            gestureStatus.textContent = 'Error de conexión';
-        };
+    function drawHand(ctx, lm) {
+        ctx.strokeStyle = '#00FFFF';
+        ctx.fillStyle = '#00FFFF';
+        ctx.lineWidth = 2;
+
+        connections.forEach(([i, j]) => {
+            ctx.beginPath();
+            ctx.moveTo(lm[i].x * handCanvas.width, lm[i].y * handCanvas.height);
+            ctx.lineTo(lm[j].x * handCanvas.width, lm[j].y * handCanvas.height);
+            ctx.stroke();
+        });
+
+        lm.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x * handCanvas.width, p.y * handCanvas.height, 3, 0, 2 * Math.PI);
+            ctx.fill();
+        });
+    }
+
+    function processFrame() {
+        if (!isActive || !videoEl || !handModel) return;
+        
+        const tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width = 320;
+        tmpCanvas.height = 240;
+        const tmpCtx = tmpCanvas.getContext('2d');
+        tmpCtx.drawImage(videoEl, 0, 0);
+        
+        handModel.send({ image: tmpCanvas });
+    }
+
+    async function startHandControl() {
+        try {
+            stream = await navigator.mediaDevices.getUserMedia({
+                video: { width: 320, height: 240, facingMode: 'user' }
+            });
+
+            videoEl = document.createElement('video');
+            videoEl.srcObject = stream;
+            videoEl.setAttribute('playsinline', '');
+            videoEl.muted = true;
+            
+            videoEl.onloadedmetadata = () => {
+                videoEl.play().then(() => {
+                    processFrame();
+                });
+            };
+        } catch (e) {
+            console.error(e);
+            gestureStatus.textContent = 'Error: ' + e.message;
+            stopHandControlFunc();
+        }
     }
 
     function stopHandControlFunc() {
-        if (ws) {
-            ws.send(JSON.stringify({ action: 'stop' }));
-            ws.close();
-            ws = null;
-        }
         isActive = false;
+        if (stream) {
+            stream.getTracks().forEach(t => t.stop());
+            stream = null;
+        }
+        videoEl = null;
         cameraPreview.classList.add('hidden');
         handCursor.classList.add('hidden');
         handControlBtn.classList.remove('bg-red-600');
         handControlBtn.classList.add('bg-purple-600');
+        gestureStatus.textContent = 'Detenido';
     }
 
     handControlBtn.addEventListener('click', async () => {
         if (!isActive) {
+            await loadModel();
             isActive = true;
             cameraPreview.classList.remove('hidden');
             handCursor.classList.remove('hidden');
             handControlBtn.classList.remove('bg-purple-600');
             handControlBtn.classList.add('bg-red-600');
-            gestureStatus.textContent = 'Conectando...';
-            try {
-                await connectHandControl();
-            } catch (e) {
-                gestureStatus.textContent = 'Error: ¿Servidor activo?';
-                stopHandControlFunc();
-            }
+            gestureStatus.textContent = 'Iniciando...';
+            await startHandControl();
         } else {
             stopHandControlFunc();
         }
