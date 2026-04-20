@@ -253,11 +253,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const handCursor = document.getElementById('handCursor');
     const handTutorial = document.getElementById('handTutorial');
     const startHandControlBtn = document.getElementById('startHandControl');
+    const videoHidden = document.getElementById('handVideoHidden');
 
     let isActive = false;
     let isFirstTime = true;
     let handModel = null;
-    let videoEl = null;
     let stream = null;
     let pinchLocked = false;
 
@@ -281,7 +281,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             handModel.onResults(onResults);
-            gestureStatus.textContent = 'Listo';
+            gestureStatus.textContent = 'Modelo listo';
         } catch (e) {
             gestureStatus.textContent = 'Error: ' + e.message;
             console.error(e);
@@ -296,15 +296,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         ctx.clearRect(0, 0, handCanvas.width, handCanvas.height);
         
-        if (videoEl && videoEl.readyState >= 2) {
+        if (videoHidden && videoHidden.readyState >= 2) {
             ctx.save();
             ctx.translate(handCanvas.width, 0);
             ctx.scale(-1, 1);
-            ctx.drawImage(videoEl, 0, 0, handCanvas.width, handCanvas.height);
+            ctx.drawImage(videoHidden, 0, 0, handCanvas.width, handCanvas.height);
             ctx.restore();
         } else {
-            ctx.fillStyle = '#333';
+            ctx.fillStyle = '#222';
             ctx.fillRect(0, 0, handCanvas.width, handCanvas.height);
+            ctx.fillStyle = '#555';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('Iniciando cámara...', handCanvas.width/2, handCanvas.height/2);
         }
 
         let handDetected = false;
@@ -339,7 +343,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (idxExt && !midExt) {
                     window.scrollBy(0, -15);
                     gestureStatus.textContent = '☝️ Scroll ↑';
-                } else if (!idxExt && midExt) {
+                } else if (!idxExt && middleExt) {
                     window.scrollBy(0, 15);
                     gestureStatus.textContent = '🖖 Scroll ↓';
                 } else {
@@ -354,9 +358,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         ctx.restore();
         
-        requestAnimationFrame(() => {
-            if (isActive && videoEl) processFrame();
-        });
+        if (isActive && handModel) {
+            requestAnimationFrame(processFrame);
+        }
     }
 
     function drawHand(ctx, lm) {
@@ -379,9 +383,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function processFrame() {
-        if (!isActive || !videoEl || !handModel) return;
+        if (!isActive || !videoHidden || !handModel) return;
         
-        if (videoEl.readyState < 2) {
+        if (videoHidden.readyState < 2) {
             requestAnimationFrame(processFrame);
             return;
         }
@@ -390,7 +394,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tmpCanvas.width = 320;
         tmpCanvas.height = 240;
         const tmpCtx = tmpCanvas.getContext('2d');
-        tmpCtx.drawImage(videoEl, 0, 0, 320, 240);
+        tmpCtx.drawImage(videoHidden, 0, 0, 320, 240);
         
         try {
             handModel.send({ image: tmpCanvas });
@@ -401,31 +405,22 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function startHandControl() {
         try {
-            gestureStatus.textContent = 'Abriendo cámara...';
+            gestureStatus.textContent = 'Pidiendo cámara...';
             
             stream = await navigator.mediaDevices.getUserMedia({
                 video: { width: 320, height: 240, facingMode: 'user' }
             });
 
-            videoEl = document.createElement('video');
-            videoEl.srcObject = stream;
-            videoEl.setAttribute('playsinline', '');
-            videoEl.muted = true;
-            videoEl.autoplay = true;
+            videoHidden.srcObject = stream;
+            videoHidden.setAttribute('playsinline', '');
+            videoHidden.muted = true;
+            videoHidden.autoplay = true;
             
-            videoEl.onloadedmetadata = () => {
-                gestureStatus.textContent = 'Iniciando...';
-                videoEl.play().then(() => {
-                    gestureStatus.textContent = '🎯 Listo!';
-                    setTimeout(() => processFrame(), 100);
-                }).catch(e => {
-                    gestureStatus.textContent = 'Error play: ' + e.message;
-                });
-            };
+            await videoHidden.play();
             
-            videoEl.onerror = (e) => {
-                gestureStatus.textContent = 'Error video: ' + e.type;
-            };
+            gestureStatus.textContent = '🎯 Procesando...';
+            
+            setTimeout(processFrame, 500);
         } catch (e) {
             console.error(e);
             gestureStatus.textContent = 'Error: ' + e.message;
@@ -439,7 +434,9 @@ document.addEventListener('DOMContentLoaded', function() {
             stream.getTracks().forEach(t => t.stop());
             stream = null;
         }
-        videoEl = null;
+        if (videoHidden) {
+            videoHidden.srcObject = null;
+        }
         cameraPreview.classList.add('hidden');
         handCursor.classList.add('hidden');
         handControlBtn.classList.remove('bg-red-600');
