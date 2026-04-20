@@ -253,7 +253,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const handCursor = document.getElementById('handCursor');
     const handTutorial = document.getElementById('handTutorial');
     const startHandControlBtn = document.getElementById('startHandControl');
-    const videoHidden = document.getElementById('handVideoHidden');
+    const videoEl = document.getElementById('handVideoEl');
 
     let isActive = false;
     let isFirstTime = true;
@@ -296,19 +296,12 @@ document.addEventListener('DOMContentLoaded', function() {
         
         ctx.clearRect(0, 0, handCanvas.width, handCanvas.height);
         
-        if (videoHidden && videoHidden.readyState >= 2) {
+        if (videoEl && videoEl.readyState >= 2) {
             ctx.save();
             ctx.translate(handCanvas.width, 0);
             ctx.scale(-1, 1);
-            ctx.drawImage(videoHidden, 0, 0, handCanvas.width, handCanvas.height);
+            ctx.drawImage(videoEl, 0, 0, handCanvas.width, handCanvas.height);
             ctx.restore();
-        } else {
-            ctx.fillStyle = '#222';
-            ctx.fillRect(0, 0, handCanvas.width, handCanvas.height);
-            ctx.fillStyle = '#555';
-            ctx.font = '12px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.fillText('Iniciando cámara...', handCanvas.width/2, handCanvas.height/2);
         }
 
         let handDetected = false;
@@ -343,7 +336,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (idxExt && !midExt) {
                     window.scrollBy(0, -15);
                     gestureStatus.textContent = '☝️ Scroll ↑';
-                } else if (!idxExt && middleExt) {
+                } else if (!idxExt && midExt) {
                     window.scrollBy(0, 15);
                     gestureStatus.textContent = '🖖 Scroll ↓';
                 } else {
@@ -358,9 +351,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         ctx.restore();
         
-        if (isActive && handModel) {
-            requestAnimationFrame(processFrame);
-        }
+        setTimeout(() => {
+            if (isActive && handModel) processFrame();
+        }, 30);
     }
 
     function drawHand(ctx, lm) {
@@ -383,9 +376,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function processFrame() {
-        if (!isActive || !videoHidden || !handModel) return;
+        if (!isActive || !videoEl || !handModel) return;
         
-        if (videoHidden.readyState < 2) {
+        if (videoEl.readyState < 2) {
             requestAnimationFrame(processFrame);
             return;
         }
@@ -394,7 +387,7 @@ document.addEventListener('DOMContentLoaded', function() {
         tmpCanvas.width = 320;
         tmpCanvas.height = 240;
         const tmpCtx = tmpCanvas.getContext('2d');
-        tmpCtx.drawImage(videoHidden, 0, 0, 320, 240);
+        tmpCtx.drawImage(videoEl, 0, 0, 320, 240);
         
         try {
             handModel.send({ image: tmpCanvas });
@@ -411,12 +404,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 video: { width: 320, height: 240, facingMode: 'user' }
             });
 
-            videoHidden.srcObject = stream;
-            videoHidden.setAttribute('playsinline', '');
-            videoHidden.muted = true;
-            videoHidden.autoplay = true;
+            videoEl.srcObject = stream;
+            videoEl.setAttribute('playsinline', '');
+            videoEl.muted = true;
+            videoEl.autoplay = true;
             
-            await videoHidden.play();
+            await videoEl.play();
             
             gestureStatus.textContent = '🎯 Procesando...';
             
@@ -434,8 +427,8 @@ document.addEventListener('DOMContentLoaded', function() {
             stream.getTracks().forEach(t => t.stop());
             stream = null;
         }
-        if (videoHidden) {
-            videoHidden.srcObject = null;
+        if (videoEl) {
+            videoEl.srcObject = null;
         }
         cameraPreview.classList.add('hidden');
         handCursor.classList.add('hidden');

@@ -4,7 +4,7 @@ import asyncio
 import json
 import numpy as np
 import base64
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 import uvicorn
 import threading
@@ -61,6 +61,7 @@ def detect_gesture(hand_landmarks):
     with lock:
         gesture_state["cursor_x"] = int(points["index_tip"][0] * 100)
         gesture_state["cursor_y"] = int(points["index_tip"][1] * 100)
+        gesture_state["scroll"] = 0
         
         if dist_thumb_index < 0.05:
             if not gesture_state["pinch_locked"]:
@@ -86,6 +87,13 @@ def detect_gesture(hand_landmarks):
     return gesture_state
 
 
+def reset_gesture_state(gesture="waiting"):
+    with lock:
+        gesture_state["click"] = False
+        gesture_state["scroll"] = 0
+        gesture_state["gesture"] = gesture
+
+
 async def websocket_handler(websocket):
     clients.add(websocket)
     try:
@@ -97,10 +105,10 @@ async def websocket_handler(websocket):
                 await process_camera(websocket)
             elif data.get("action") == "stop":
                 break
-    except websockets.exceptions.ConnectionClosed:
+    except WebSocketDisconnect:
         pass
     finally:
-        clients.remove(websocket)
+        clients.discard(websocket)
 
 
 async def process_camera(websocket):
@@ -108,12 +116,27 @@ async def process_camera(websocket):
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 320)
     cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 240)
+
+    if not cap.isOpened():
+        await websocket.send(json.dumps({
+            "status": "error",
+            "message": "No se pudo abrir la camara."
+        }))
+        if cap:
+            cap.release()
+            cap = None
+        return
+
     running = True
     
     try:
         while running and cap.isOpened():
             success, frame = cap.read()
             if not success:
+                await websocket.send(json.dumps({
+                    "status": "error",
+                    "message": "No se pudo leer la camara."
+                }))
                 break
             
             frame = cv2.flip(frame, 1)
@@ -129,6 +152,10 @@ async def process_camera(websocket):
                 for hand_landmarks in results.multi_hand_landmarks:
                     mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
                     gesture_data["gesture_state"] = detect_gesture(hand_landmarks)
+            else:
+                reset_gesture_state("waiting")
+                with lock:
+                    gesture_data["gesture_state"] = dict(gesture_state)
             
             _, buffer = cv2.imencode('.jpg', frame)
             frame_b64 = base64.b64encode(buffer).decode('utf-8')
@@ -140,7 +167,12 @@ async def process_camera(websocket):
         running = False
         if cap:
             cap.release()
-        await websocket.send(json.dumps({"status": "stopped"}))
+            cap = None
+        reset_gesture_state("stopped")
+        try:
+            await websocket.send(json.dumps({"status": "stopped", "gesture_state": dict(gesture_state)}))
+        except RuntimeError:
+            pass
 
 
 @app.websocket("/connect")

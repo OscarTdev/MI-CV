@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vista Remota - Cámara</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0d0d0d;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        video {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 12px;
+            background: #1a1a1a;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .connecting { background: #fbbf24; color: black; }
+        .connected { background: #22c55e; color: white; }
+        .error { background: #ef4444; color: white; }
+        h1 { margin-bottom: 20px; font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <h1>Conectando cámara...</h1>
+    <video id="video" autoplay playsinline muted></video>
+    <div id="status" class="connecting">Esperando permisos...</div>
+
+    <script>
+        const video = document.getElementById('video');
+        const status = document.getElementById('status');
+        const wsUrl = `ws://${window.location.host}/ws`;
+        let ws;
+
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+                video.srcObject = stream;
+                status.textContent = 'Cámara conectada';
+                status.className = 'connected';
+                connectWebSocket(stream);
+            } catch (err) {
+                status.textContent = 'Error: ' + err.message;
+                status.className = 'error';
+                console.error(err);
+            }
+        }
+
+        function connectWebSocket(stream) {
+            ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                status.textContent = 'Conectado al servidor';
+                status.className = 'connected';
+                stream.getTracks().forEach(track => {
+                    ws.send(JSON.stringify({ type: 'track', track: track.kind }));
+                });
+            };
+
+            ws.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'offer') {
+                    const pc = new RTCPeerConnection({
+                        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                    });
+                    stream.getTracks().forEach(track => pc.addTrack(track, stream));
+                    pc.onicecandidate = e => {
+                        if (e.candidate) ws.send(JSON.stringify({ type: 'ice-candidate', candidate: e.candidate }));
+                    };
+                    await pc.setRemoteDescription(data.sdp);
+                    const answer = await pc.createAnswer();
+                    await pc.setLocalDescription(answer);
+                    ws.send(JSON.stringify({ type: 'answer', sdp: answer }));
+                }
+            };
+
+            ws.onerror = () => {
+                status.textContent = 'Error de conexión';
+                status.className = 'error';
+            };
+        }
+
+        startCamera();
+    </script>
+</body>
+</html>

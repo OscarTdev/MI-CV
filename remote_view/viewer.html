@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ver Cámara Remota</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: system-ui, sans-serif;
+            background: #0d0d0d;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        video {
+            width: 100%;
+            max-width: 800px;
+            border-radius: 12px;
+            background: #1a1a1a;
+        }
+        #status {
+            margin: 20px 0;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .waiting { background: #3b82f6; color: white; }
+        .connected { background: #22c55e; color: white; }
+        .error { background: #ef4444; color: white; }
+        h1 { margin-bottom: 20px; font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <h1>Ver cámara remota</h1>
+    <video id="video" autoplay playsinline></video>
+    <div id="status" class="waiting">Conectando...</div>
+
+    <script>
+        const video = document.getElementById('video');
+        const status = document.getElementById('status');
+        const wsUrl = `ws://${window.location.host}/ws`;
+        let pc;
+        let remoteStream = new MediaStream();
+
+        async function connectWebSocket() {
+            const ws = new WebSocket(wsUrl);
+            pc = new RTCPeerConnection({
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            });
+
+            pc.ontrack = event => {
+                event.streams[0].getTracks().forEach(track => {
+                    remoteStream.addTrack(track);
+                });
+                video.srcObject = remoteStream;
+                status.textContent = 'Recibiendo cámara';
+                status.className = 'connected';
+            };
+
+            pc.onicecandidate = e => {
+                if (e.candidate) {
+                    ws.send(JSON.stringify({ type: 'ice-candidate', candidate: e.candidate }));
+                }
+            };
+
+            ws.onopen = () => {
+                status.textContent = 'Conectado, esperando video...';
+                startConnection(ws);
+            };
+
+            ws.onmessage = async (event) => {
+                const data = JSON.parse(event.data);
+                if (data.type === 'offer') {
+                    await pc.setRemoteDescription(data.sdp);
+                    const answer = await pc.createAnswer();
+                    await pc.setLocalDescription(answer);
+                    ws.send(JSON.stringify({ type: 'answer', sdp: answer }));
+                } else if (data.type === 'ice-candidate') {
+                    await pc.addIceCandidate(data.candidate);
+                }
+            };
+
+            ws.onerror = () => {
+                status.textContent = 'Error de conexión';
+                status.className = 'error';
+            };
+        }
+
+        async function startConnection(ws) {
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            ws.send(JSON.stringify({ type: 'offer', sdp: offer }));
+        }
+
+        connectWebSocket();
+    </script>
+</body>
+</html>
