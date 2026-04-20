@@ -31,10 +31,10 @@ document.addEventListener('DOMContentLoaded', function() {
     new Chart(ctx, {
         type: 'radar',
         data: {
-            labels: ['Metalmecánica', 'Electricidad y Seguridad', 'Construcción', 'Atención al Cliente', 'Soporte Técnico', 'Desarrollo Web'],
+            labels: ['Desarrollo Web', 'Bases de Datos', 'Análisis de Requisitos', 'Diseño UI/UX', 'Atención al Cliente', 'Soporte Técnico'],
             datasets: [{
                 label: 'Nivel de Experiencia',
-                data: [85, 80, 70, 90, 75, 60],
+                data: [65, 50, 60, 55, 90, 75],
                 backgroundColor: 'rgba(0, 255, 255, 0.2)',
                 borderColor: 'rgba(0, 255, 255, 1)',
                 pointBackgroundColor: 'rgba(0, 255, 255, 1)',
@@ -93,27 +93,27 @@ document.addEventListener('DOMContentLoaded', function() {
     const timelineData = [
         {
             date: '2025 - Actualmente',
-            title: 'Desarrollo Web (Autoaprendizaje y Universitario)',
+            title: 'Desarrollador de Software (Independiente)',
             icon: '💻',
             company: 'Proyectos Personales / Formación Continua',
             side: 'left',
-            details: 'Aprendizaje proactivo de fundamentos de desarrollo web, incluyendo HTML, CSS, JavaScript y familiarización con frameworks modernos, a través de recursos de autoaprendizaje y mi formación universitaria en Ingeniería de Software, para construir aplicaciones interactivas y responsivas.',
+            details: 'Aprendiendo los fundamentos del software para aplicar todas las etapas del ciclo de desarrollo: análisis de requisitos, diseño, desarrollo, pruebas, despliegue y mantenimiento. Enfoque como desarrollador independiente para crear soluciones completas.',
             images: [
-                'https://placehold.co/400x250/a7f3d0/0d9488?text=Desarrollo+Web+1',
-                'https://placehold.co/400x250/6ee7b7/0d9488?text=Desarrollo+Web+2',
-                'https://placehold.co/400x250/2dd4bf/0d9488?text=Desarrollo+Web+3'
+                'https://placehold.co/400x250/a7f3d0/0d9488?text=Desarrollo+Software+1',
+                'https://placehold.co/400x250/6ee7b7/0d9488?text=Desarrollo+Software+2',
+                'https://placehold.co/400x250/2dd4bf/0d9488?text=Desarrollo+Software+3'
             ]
         },
         {
             date: 'Dic 2024 - Actualmente',
-            title: 'Técnico en Electricidad y Cámaras de Seguridad',
+            title: 'Desarrollador Independiente',
             icon: '⚡',
             company: 'Freelance (Independiente)',
             side: 'right',
-            details: 'Técnico independiente en electricidad residencial y cámaras de seguridad. Instalación, configuración y mantenimiento de sistemas eléctricos y de videovigilancia para hogares y pequeñas empresas.',
+            details: 'Desarrollador independiente enfocándome en el ciclo completo de desarrollo de software. Aprendizaje continuo en análisis, diseño, desarrollo, pruebas y mantenimiento de aplicaciones.',
             images: [
-                'https://placehold.co/400x250/60a5fa/2563eb?text=Electricidad+1',
-                'https://placehold.co/400x250/93c5fd/2563eb?text=Electricidad+2'
+                'https://placehold.co/400x250/60a5fa/2563eb?text=Desarrollo+Independiente+1',
+                'https://placehold.co/400x250/93c5fd/2563eb?text=Desarrollo+Independiente+2'
             ]
         },
         {
@@ -131,14 +131,14 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         {
             date: '2019 - 2021',
-            title: 'Técnico en Metalmecánica',
-            icon: '⚙️',
-            company: 'Mármol y Grabados J.J.C',
+            title: 'Técnico en Construcción',
+            icon: '🏗️',
+            company: 'ECTORRE',
             side: 'right',
-            details: 'Trabajo en metalmecánica, corte, doblado y soldadura de materiales metálicos, fabricación de structures y piezas personalizadas.',
+            details: 'Trabajo en construcción, mantenimiento de instalaciones, acabados y reparaciones generales.',
             images: [
-                'https://placehold.co/400x250/a3e635/65a30d?text=Metalmecánica+1',
-                'https://placehold.co/400x250/d9f99d/65a30d?text=Metalmecánica+2'
+                'https://placehold.co/400x250/a3e635/65a30d?text=Construcción+1',
+                'https://placehold.co/400x250/d9f99d/65a30d?text=Construcción+2'
             ]
         },
         {
