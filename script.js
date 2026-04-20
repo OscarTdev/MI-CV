@@ -141,17 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 'https://placehold.co/400x250/d9f99d/65a30d?text=Construcción+2'
             ]
         },
-        {
-            date: '2018 - 2019',
-            title: 'Aprendiz de Electricidad',
-            icon: '🔌',
-            company: 'Electricidad y Refrigeración Torres',
-            side: 'left',
-            details: 'Aprendizaje en instalaões eléctricas residenciales y comerciales, mantenimiento preventivo y correctivo, lectura de planos eléctricos.',
-            images: [
-                'https://placehold.co/400x250/fde047/ca8a04?text=Electricidad+1'
-            ]
-        }
     ];
 
     const currentCarouselIndexes = {};
