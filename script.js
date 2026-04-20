@@ -298,9 +298,13 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (videoEl && videoEl.readyState >= 2) {
             ctx.save();
+            ctx.translate(handCanvas.width, 0);
             ctx.scale(-1, 1);
             ctx.drawImage(videoEl, 0, 0, handCanvas.width, handCanvas.height);
             ctx.restore();
+        } else {
+            ctx.fillStyle = '#333';
+            ctx.fillRect(0, 0, handCanvas.width, handCanvas.height);
         }
 
         let handDetected = false;
@@ -377,13 +381,22 @@ document.addEventListener('DOMContentLoaded', function() {
     function processFrame() {
         if (!isActive || !videoEl || !handModel) return;
         
+        if (videoEl.readyState < 2) {
+            requestAnimationFrame(processFrame);
+            return;
+        }
+        
         const tmpCanvas = document.createElement('canvas');
         tmpCanvas.width = 320;
         tmpCanvas.height = 240;
         const tmpCtx = tmpCanvas.getContext('2d');
-        tmpCtx.drawImage(videoEl, 0, 0);
+        tmpCtx.drawImage(videoEl, 0, 0, 320, 240);
         
-        handModel.send({ image: tmpCanvas });
+        try {
+            handModel.send({ image: tmpCanvas });
+        } catch(e) {
+            console.error(e);
+        }
     }
 
     async function startHandControl() {
@@ -398,18 +411,20 @@ document.addEventListener('DOMContentLoaded', function() {
             videoEl.srcObject = stream;
             videoEl.setAttribute('playsinline', '');
             videoEl.muted = true;
+            videoEl.autoplay = true;
             
             videoEl.onloadedmetadata = () => {
+                gestureStatus.textContent = 'Iniciando...';
                 videoEl.play().then(() => {
                     gestureStatus.textContent = '🎯 Listo!';
-                    processFrame();
+                    setTimeout(() => processFrame(), 100);
                 }).catch(e => {
-                    gestureStatus.textContent = 'Error: ' + e.message;
+                    gestureStatus.textContent = 'Error play: ' + e.message;
                 });
             };
             
-            videoEl.onerror = () => {
-                gestureStatus.textContent = 'Error de video';
+            videoEl.onerror = (e) => {
+                gestureStatus.textContent = 'Error video: ' + e.type;
             };
         } catch (e) {
             console.error(e);
