@@ -296,11 +296,16 @@ document.addEventListener('DOMContentLoaded', function() {
         
         ctx.clearRect(0, 0, handCanvas.width, handCanvas.height);
         
-        if (results.image) {
-            ctx.drawImage(results.image, 0, 0, handCanvas.width, handCanvas.height);
+        if (videoEl && videoEl.readyState >= 2) {
+            ctx.save();
+            ctx.scale(-1, 1);
+            ctx.drawImage(videoEl, 0, 0, handCanvas.width, handCanvas.height);
+            ctx.restore();
         }
 
+        let handDetected = false;
         if (results.multiHandLandmarks && results.multiHandLandmarks.length > 0) {
+            handDetected = true;
             const lm = results.multiHandLandmarks[0];
             drawHand(ctx, lm);
 
@@ -337,15 +342,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     gestureStatus.textContent = '✊ Idle';
                 }
             }
-        } else {
+        }
+        
+        if (!handDetected) {
             gestureStatus.textContent = '👀 Sin mano';
         }
         
         ctx.restore();
         
-        setTimeout(() => {
+        requestAnimationFrame(() => {
             if (isActive && videoEl) processFrame();
-        }, 50);
+        });
     }
 
     function drawHand(ctx, lm) {
