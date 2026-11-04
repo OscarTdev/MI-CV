@@ -296,8 +296,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastScrollAt = 0;
     const handCanvasCtx = handCanvas.getContext('2d');
     const frameImage = new Image();
-    const HAND_CONTROL_HOST = window.HAND_CONTROL_HOST || '127.0.0.1';
-    const HAND_CONTROL_PORT = window.HAND_CONTROL_PORT || '8000';
+    const HAND_CONTROL_HOST = window.HAND_CONTROL_HOST || 'mi-cv-0flu.onrender.com';
+    const HAND_CONTROL_PORT = window.HAND_CONTROL_PORT || '443';
     const frameCanvas = document.createElement('canvas');
     const frameCtx = frameCanvas.getContext('2d');
     let frameLoopId = null;
