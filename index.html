@@ -35,6 +35,7 @@
                         <a href="#inicio" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Inicio</a>
                         <a href="#trayectoria" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Trayectoria</a>
                         <a href="#habilidades" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Habilidades</a>
+                        <a href="#demostracion" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Demostración</a>
                         <a href="#educacion" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Educación</a>
                         <a href="#contacto" class="text-gray-300 hover:bg-purple-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300">Contacto</a>
                     </div>
@@ -56,6 +57,7 @@
                 <a href="#inicio" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Inicio</a>
                 <a href="#trayectoria" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Trayectoria</a>
                 <a href="#habilidades" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Habilidades</a>
+                <a href="#demostracion" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Demostración</a>
                 <a href="#educacion" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Educación</a>
                 <a href="#contacto" class="text-gray-300 hover:bg-purple-700 hover:text-white block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300">Contacto</a>
             </div>
@@ -64,29 +66,34 @@
 
     <main>
         <!-- Sección de Inicio: Presentación principal del perfil -->
-        <section id="inicio" class="py-20 md:py-28">
+        <section id="inicio" class="min-h-[70vh] py-24 md:py-36 flex items-center justify-center">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <div class="mb-8">
-                    <!-- Foto de perfil de Oscar David Torres Baena -->
-                    <img id="profile-picture" class="mx-auto rounded-full w-32 h-32 object-cover border-4 border-cyan-400 shadow-lg shadow-cyan-600/50"
+                <!-- Foto de perfil de Oscar David Torres Baena -->
+                <div class="mb-10">
+                    <img id="profile-picture" class="mx-auto rounded-full w-40 h-40 md:w-48 md:h-48 object-cover border-4 border-cyan-400 shadow-lg shadow-cyan-600/50"
                          src="https://i.imgur.com/YI6oGfW.jpeg"
-                         onerror="this.onerror=null;this.src='https://placehold.co/128x128/1A0F2D/00FFFF?text=Error+cargando+imagen';"
+                         onerror="this.onerror=null;this.src='https://placehold.co/160x160/1A0F2D/00FFFF?text=Error+cargando+imagen';"
                          alt="Foto de perfil de Oscar David Torres Baena">
                 </div>
-                <!-- Título principal con colores y sombras futuristas -->
-                <h1 class="text-4xl md:text-6xl font-extrabold text-cyan-400 tracking-tight drop-shadow-lg shadow-cyan-500">Oscar David Torres Baena</h1>
-                <!-- Subtítulo del perfil -->
-                <p class="mt-4 text-lg md:text-xl font-medium text-purple-400">Estudiante de Ingeniería de Software | Desarrollador Independiente</p>
+                <!-- Título principal -->
+                <h1 class="text-5xl md:text-7xl font-extrabold text-cyan-400 tracking-tight mb-4">Oscar David Torres Baena</h1>
+                <!-- Frase de valor (h2) -->
+                <p class="mt-2 text-xl md:text-3xl font-semibold text-cyan-400 max-w-2xl mx-auto">Desarrollador de software independiente. Construyo soluciones completas desde el análisis hasta el despliegue.</p>
                 <!-- Descripción del perfil profesional -->
-                <div id="currentProfileText" class="mt-8 max-w-3xl mx-auto text-gray-300 text-base md:text-lg leading-relaxed">
+                <div id="currentProfileText" class="mt-10 max-w-2xl mx-auto text-gray-300 text-base md:text-lg leading-relaxed">
                     <p>
-                        Profesional dinámico y comprometido en formación como desarrollador de software independiente. Estoy aprendiendo los fundamentos del software para aplicar todas las etapas del ciclo de desarrollo: desde el análisis de requisitos hasta el despliegue y mantenimiento. Tengo facilidad para aprender rápidamente y manejar diversas tareas eficientemente, destacando en la resolución de problemas. Soy proactivo y adaptable, con una sólida base técnica, comprometido con el aprendizaje continuo y el trabajo en equipo para entregar soluciones de alta calidad. Busco oportunidades para contribuir y crecer como desarrollador independiente en entornos desafiantes.
+                        Profesional dinámico y comprometido en formación como desarrollador de software independiente. Aprendo los fundamentos del software para aplicar todas las etapas del ciclo de desarrollo: análisis de requisitos, diseño, desarrollo, pruebas, despliegue y mantenimiento. Tengo facilidad para aprender rápidamente, destaco en la resolución de problemas y soy proactivo y adaptable. Busco oportunidades para crecer como desarrollador independiente en entornos desafiantes.
                     </p>
                 </div>
-                 <!-- Botón para ir a la sección de contacto, con estilo futurista -->
-                 <a href="#contacto" class="mt-10 inline-block bg-purple-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg shadow-purple-500/50 hover:bg-purple-600 transition-transform transform hover:scale-105 border border-purple-400">
-                    Contactar
-                </a>
+                 <!-- CTAs: máximo dos -->
+                 <div class="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
+                    <a href="#contacto" class="inline-block bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg shadow-cyan-500/50 hover:bg-cyan-500 transition-transform hover:scale-105 border border-cyan-400">
+                        Contactar
+                    </a>
+                    <a href="Hoja_de_vida_Oscar_Torres..pdf" download="Oscar_Torres_Hoja_de_Vida.pdf" target="_blank" class="inline-block border-2 border-cyan-400 text-cyan-400 font-bold py-3 px-8 rounded-lg hover:bg-cyan-400 hover:text-white transition-colors duration-300">
+                        Descargar CV
+                    </a>
+                </div>
             </div>
         </section>
 
@@ -167,6 +174,35 @@
                                 <button class="elaborate-skill-btn mt-3 bg-purple-700 text-white px-3 py-1 rounded-full text-sm hover:bg-purple-600 transition-colors duration-300">✨ Elaborar</button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Sección de Demostración Interactiva: Hand Control y Visual IA -->
+        <section id="demostracion" class="py-20 bg-gray-900 border-t border-b border-cyan-800">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-cyan-400 tracking-tight">
+                        <span class="text-3xl mr-2">🎮</span>Demostración Interactiva
+                    </h2>
+                    <p class="mt-2 text-lg text-gray-400 max-w-2xl mx-auto">Controla esta CV con tu mano y explora contenido visual generado con IA.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-xl font-semibold text-cyan-400 mb-3">Control por Mano</h3>
+                        <p class="text-gray-300 mb-6">Navega este CV con tu webcam: índice+medio mueve el cursor, pulgar+índice hace clic, solo índice scroll arriba, solo medio scroll abajo, puño cerrado idle.</p>
+                        <button id="handControlBtnSection" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg shadow-cyan-500/50 hover:shadow-cyan-500/80 transition-all hover:scale-105 border border-cyan-400">
+                            Activar Control por Mano
+                        </button>
+                    </div>
+                    <div class="bg-gray-800 rounded-lg border border-cyan-700 p-6">
+                        <h3 class="text-xl font-semibold text-cyan-400 mb-3">Visual IA — Generación de Contenido</h3>
+                        <p class="text-gray-300 mb-6">Demos y contenido visual generado con IA para mostrar proyectos.</p>
+                        <div class="aspect-video bg-gray-900 rounded-lg overflow-hidden border border-gray-700 flex items-center justify-center h-64">
+                            <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80" alt="Contenido visual generado con IA" class="w-full h-full object-cover">
+                        </div>
+                        <p class="mt-3 text-xs text-gray-500 text-center">Imagen de ejemplo — reemplaza con tu propio contenido de generación de IA.</p>
                     </div>
                 </div>
             </div>
@@ -259,7 +295,7 @@
     </footer>
 
 <!-- Botón flotante de WhatsApp -->
-    <a href="https://wa.me/573195771112?text=Hola%20Oscar,%20te%20contacto%20desde%20tu%20CV%20interactivo" target="_blank" class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 p-3 rounded-full shadow-lg shadow-green-500/50 hover:shadow-green-500/80 transition-all duration-300 hover:scale-110 z-50" aria-label="Contactar por WhatsApp">
+    <a href="https://wa.me/573043223100?text=Hola%20Oscar,%20te%20contacto%20desde%20tu%20CV%20interactivo" target="_blank" class="fixed bottom-6 right-6 bg-green-500 hover:bg-green-600 p-3 rounded-full shadow-lg shadow-green-500/50 hover:shadow-green-500/80 transition-all duration-300 hover:scale-110 z-50" aria-label="Contactar por WhatsApp">
         <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WhatsApp" class="w-7 h-7">
     </a>
 

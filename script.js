@@ -199,6 +199,58 @@ document.addEventListener('DOMContentLoaded', function() {
         timelineItems[0].classList.add('active');
     }
 
+    // Explicaciones estáticas de habilidades blandas (en español, sin API externa).
+    const skillExplanations = {
+        'Resolución de Problemas': 'Capacidad para analizar una situación, identificar la causa raíz de un problema y proponer soluciones efectivas. Beneficia al equipo al reducir tiempos de bloqueo y mejorar la calidad de las entregas.',
+        'Habilidad para aprender rápidamente y adaptarme': 'Facilidad para adoptar nuevas tecnologías, herramientas y metodologías en poco tiempo. Permite al equipo mantenerse actualizado y enfrentar cambios de requerimientos sin fricción.',
+        'Trabajo en Equipo y Comunicación': 'Habilidad para colaborar con otros miembros del equipo, escuchar activamente y comunicar ideas de forma clara. Mejora el ambiente de trabajo y la alineación hacia objetivos comunes.',
+        'Proactividad e Iniciativa': 'Tendencia a anticipar necesidades, proponer mejoras y actuar sin esperar instrucciones directas. Aporta valor al equipo al identificar oportunidades antes de que se conviertan en problemas.',
+        'Orientación a Resultados y Compromiso': 'Enfoque en cumplir metas y entregar valor dentro de los plazos acordados. Genera confianza en el equipo y en los stakeholders al entregar lo prometido.',
+        'Atención al Detalle': 'Capacidad de revisar y corregir pequeños aspectos que pueden pasar desapercibidos. Reduce errores, mejora la calidad del producto final y evita retrabajo.'
+    };
+
+    // Intenta explicar con NVIDIA (modelo ligero) si el usuario configura el endpoint y key.
+    // Fallback a texto estático si no hay configuración o la llamada falla.
+    async function explainSkill(skillName) {
+        const nvidiaEndpoint = window.NVIDIA_ENDPOINT || '';
+        const nvidiaApiKey = window.NVIDIA_API_KEY || '';
+        const staticText = skillExplanations[skillName] || 'Explicación no disponible para esta habilidad.';
+
+        if (!nvidiaEndpoint || !nvidiaApiKey) {
+            return staticText;
+        }
+
+        try {
+            const prompt = `Explica brevemente la importancia de la habilidad blanda '${skillName}' en un entorno profesional y cómo beneficia a un equipo o a la carrera de un individuo, en español. Sé conciso, no más de 100 palabras.`;
+            const response = await fetch(nvidiaEndpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${nvidiaApiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'nvidia/llama-3.1-nemotron-nano-8b-v1',
+                    messages: [{ role: 'user', content: prompt }],
+                    temperature: 0.7,
+                    max_tokens: 200
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`NVIDIA responded ${response.status}`);
+            }
+
+            const result = await response.json();
+            if (result.choices && result.choices.length > 0 && result.choices[0].message) {
+                return result.choices[0].message.content;
+            }
+            return staticText;
+        } catch (error) {
+            console.error('NVIDIA error:', error);
+            return staticText;
+        }
+    }
+
     elaborateSkillBtns.forEach(button => {
         button.addEventListener('click', async (event) => {
             const skillName = event.target.previousElementSibling.textContent;
@@ -207,30 +259,10 @@ document.addEventListener('DOMContentLoaded', function() {
             skillModal.style.display = 'flex';
 
             try {
-                const prompt = `Explica brevemente la importancia de la habilidad blanda '${skillName}' en un entorno profesional y cómo beneficia a un equipo o a la carrera de un individuo, en español. Sé conciso, no más de 100 palabras.`;
-                let chatHistory = [];
-                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
-                const payload = { contents: chatHistory };
-                const apiKey = "AIzaSyAgHEis6KZTo4q0VFXZtCC_gjEu-JBKyNA";
-                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                if (result.candidates && result.candidates.length > 0 &&
-                    result.candidates[0].content && result.candidates[0].content.parts &&
-                    result.candidates[0].content.parts.length > 0) {
-                    const text = result.candidates[0].content.parts[0].text;
-                    modalContent.textContent = text;
-                } else {
-                    modalContent.textContent = 'No se pudo generar la explicación. Inténtalo de nuevo.';
-                }
+                const text = await explainSkill(skillName);
+                modalContent.textContent = text;
             } catch (error) {
-                modalContent.textContent = 'Error al conectar con la API de Gemini. Por favor, inténtalo más tarde.';
+                modalContent.textContent = 'No se pudo cargar la explicación. Inténtalo de nuevo.';
             }
         });
     });
@@ -264,7 +296,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let lastScrollAt = 0;
     const handCanvasCtx = handCanvas.getContext('2d');
     const frameImage = new Image();
-    const HAND_CONTROL_HOST = window.HAND_CONTROL_HOST || '192.168.40.7';
+    const HAND_CONTROL_HOST = window.HAND_CONTROL_HOST || '127.0.0.1';
     const HAND_CONTROL_PORT = window.HAND_CONTROL_PORT || '8000';
     const frameCanvas = document.createElement('canvas');
     const frameCtx = frameCanvas.getContext('2d');
@@ -580,6 +612,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     stopHandControl.addEventListener('click', stopHandControlFunc);
+
+    const handControlBtnSection = document.getElementById('handControlBtnSection');
+    if (handControlBtnSection) {
+        handControlBtnSection.addEventListener('click', () => {
+            if (isActive) {
+                stopHandControlFunc();
+            } else if (isFirstTime) {
+                document.getElementById('handTutorial').classList.remove('hidden');
+            } else {
+                activateHandControl();
+            }
+        });
+    }
 
     const cameraHeader = document.getElementById('cameraHeader');
     let isDragging = false, dragOffsetX = 0, dragOffsetY = 0;
