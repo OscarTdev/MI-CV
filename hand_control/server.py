@@ -4,7 +4,6 @@ import socket
 from typing import Any
 
 import cv2
-import mediapipe as mp
 import numpy as np
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
@@ -16,14 +15,28 @@ PORT = 8000
 
 app = FastAPI()
 
-mp_hands = mp.solutions.hands
-mp_drawing = mp.solutions.drawing_utils
-hands = mp_hands.Hands(
-    static_image_mode=False,
-    max_num_hands=1,
-    min_detection_confidence=0.7,
-    min_tracking_confidence=0.5,
-)
+# --- Intenta cargar MediaPipe, si falla usa fallback OpenCV ---
+USE_MEDIAPIPE = False
+mp_hands = None
+mp_drawing = None
+hands = None
+
+try:
+    import mediapipe as mp  # type: ignore
+
+    mp_hands = mp.solutions.hands
+    mp_drawing = mp.solutions.drawing_utils
+    hands = mp_hands.Hands(
+        static_image_mode=False,
+        max_num_hands=1,
+        min_detection_confidence=0.7,
+        min_tracking_confidence=0.5,
+    )
+    USE_MEDIAPIPE = True
+    print("[hand_control] MediaPipe cargado correctamente")
+except Exception as exc:  # noqa: BLE001
+    print(f"[hand_control] MediaPipe no disponible ({exc}), usando fallback OpenCV")
+
 
 viewers: set[WebSocket] = set()
 clients: dict[str, WebSocket] = {}
@@ -52,6 +65,9 @@ def default_gesture_state() -> dict[str, Any]:
     }
 
 
+# --- MediaPipe path ---
+
+
 def get_finger_positions(landmarks):
     return {
         "thumb_tip": np.array([landmarks[4].x, landmarks[4].y]),
@@ -62,12 +78,12 @@ def get_finger_positions(landmarks):
     }
 
 
-def detect_gesture(hand_landmarks, state: dict[str, Any]) -> dict[str, Any]:
+def detect_gesture_mediapipe(hand_landmarks, state: dict[str, Any]) -> dict[str, Any]:
     points = get_finger_positions(hand_landmarks.landmark)
 
     index_extended = points["index_tip"][1] < points["index_pip"][1]
     middle_extended = points["middle_tip"][1] < points["middle_pip"][1]
-    dist_thumb_index = np.linalg.norm(points["thumb_tip"] - points["index_tip"])
+    dist_thumb_index = float(np.linalg.norm(points["thumb_tip"] - points["index_tip"]))
 
     state["cursor_x"] = int(points["index_tip"][0] * 100)
     state["cursor_y"] = int(points["index_tip"][1] * 100)
@@ -98,11 +114,83 @@ def detect_gesture(hand_landmarks, state: dict[str, Any]) -> dict[str, Any]:
     return state
 
 
+# --- OpenCV fallback: detección de piel por HSV ---
+
+
+def skin_mask(frame) -> np.ndarray:
+    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    lower_skin = np.array([0, 20, 70], dtype=np.uint8)
+    upper_skin = np.array([50, 255, 255], dtype=np.uint8)
+    mask = cv2.inRange(hsv, lower_skin, upper_skin)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((7, 7), np.uint8))
+    return mask
+
+
+def detect_gesture_opencv(frame, state: dict[str, Any]) -> dict[str, Any]:
+    h, w = frame.shape[:2]
+    mask = skin_mask(frame)
+
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not contours:
+        state = reset_gesture_state(state, "waiting")
+        return state, None
+
+    # Tomar el contorno más grande (asumimos que es la mano)
+    largest = max(contours, key=cv2.contourArea)
+    area = cv2.contourArea(largest)
+
+    if area < 3000:
+        state = reset_gesture_state(state, "waiting")
+        return state, None
+
+    x, y, cw, ch = cv2.boundingRect(largest)
+    center_x = int((x + cw / 2) / w * 100)
+    center_y = int((y + ch / 2) / h * 100)
+
+    state["cursor_x"] = center_x
+    state["cursor_y"] = center_y
+    state["scroll"] = 0
+    state["click"] = False
+
+    # Clasificar gesto básico por aspecto del contorno
+    aspect_ratio = cw / ch if ch > 0 else 1
+
+    if aspect_ratio < 0.85:
+        # Mano más alta que ancha -> dedos extendidos (pointer)
+        state["gesture"] = "pointer"
+    elif aspect_ratio > 1.15:
+        # Mano más ancha que alta -> posible puño o mano abierta
+        if area > 12000:
+            state["gesture"] = "fist"
+        else:
+            state["gesture"] = "pointer"
+    else:
+        # Relación cuadrada -> índice extendido (scroll)
+        if center_y < 45:
+            state["gesture"] = "scroll_up"
+            state["scroll"] = -2
+        elif center_y > 55:
+            state["gesture"] = "scroll_down"
+            state["scroll"] = 2
+        else:
+            state["gesture"] = "pointer"
+
+    # Dibujar contorno en el frame para el monitor remoto
+    cv2.drawContours(frame, [largest], -1, (0, 255, 0), 2)
+    cv2.circle(frame, (int((x + cw / 2)), int((y + ch / 2))), 5, (0, 255, 0), -1)
+
+    return state, frame
+
+
 def reset_gesture_state(state: dict[str, Any], gesture: str = "waiting") -> dict[str, Any]:
     state["click"] = False
     state["scroll"] = 0
     state["gesture"] = gesture
     return state
+
+
+# --- Frame encode/decode ---
 
 
 def decode_frame(frame_b64: str):
@@ -119,6 +207,9 @@ def encode_frame(frame) -> str:
     return base64.b64encode(buffer).decode("utf-8")
 
 
+# --- WebSocket helpers ---
+
+
 async def safe_send(websocket: WebSocket, payload: dict[str, Any]) -> bool:
     try:
         await websocket.send_text(json.dumps(payload))
@@ -132,7 +223,6 @@ async def broadcast_to_viewers(payload: dict[str, Any]) -> None:
     for viewer in list(viewers):
         if not await safe_send(viewer, payload):
             stale.append(viewer)
-
     for viewer in stale:
         viewers.discard(viewer)
 
@@ -143,22 +233,29 @@ def process_user_frame(client_id: str, frame_b64: str) -> tuple[dict[str, Any], 
         raise ValueError("No se pudo decodificar el frame recibido")
 
     frame = cv2.flip(frame, 1)
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-    results = hands.process(rgb_frame)
 
     state = gesture_states.setdefault(client_id, default_gesture_state())
     state["click"] = False
     state["scroll"] = 0
 
-    if results.multi_hand_landmarks:
-        hand_landmarks = results.multi_hand_landmarks[0]
-        mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-        state = detect_gesture(hand_landmarks, state)
+    processed_frame = frame
+
+    if USE_MEDIAPIPE:
+        rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        results = hands.process(rgb_frame)
+
+        if results.multi_hand_landmarks:
+            hand_landmarks = results.multi_hand_landmarks[0]
+            mp_drawing.draw_landmarks(frame, hand_landmarks, mp_hands.HAND_CONNECTIONS)
+            state = detect_gesture_mediapipe(hand_landmarks, state)
+            processed_frame = frame
+        else:
+            state = reset_gesture_state(state, "waiting")
     else:
-        state = reset_gesture_state(state, "waiting")
+        state, processed_frame = detect_gesture_opencv(frame, state)
 
     gesture_states[client_id] = state
-    return dict(state), encode_frame(frame)
+    return dict(state), encode_frame(processed_frame)
 
 
 MONITOR_HTML = """
