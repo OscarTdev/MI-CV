@@ -361,12 +361,50 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function loadModel() {
         gestureStatus.textContent = 'Conectando al servidor...';
-        const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
 
-        await new Promise((resolve, reject) => {
-            const socket = new WebSocket(`${protocol}://${HAND_CONTROL_HOST}:${HAND_CONTROL_PORT}/connect`);
+        // Candidatos: host/puerto configurados, con y sin puerto explicito.
+        // Render sirve WebSockets en el mismo host via wss:// en el puerto 443.
+        const isSecure = window.location.protocol === 'https:' || window.location.hostname.includes('onrender.com');
+        const candidates = [
+            { protocol: isSecure ? 'wss' : 'ws', host: HAND_CONTROL_HOST, port: HAND_CONTROL_PORT },
+            { protocol: isSecure ? 'wss' : 'ws', host: HAND_CONTROL_HOST, port: '' },
+        ];
+
+        let lastError = null;
+
+        for (const candidate of candidates) {
+            const portPart = candidate.port ? `:${candidate.port}` : '';
+            const url = `${candidate.protocol}://${candidate.host}${portPart}/connect`;
+
+            try {
+                await connectSocket(url);
+                return;
+            } catch (error) {
+                lastError = error;
+                console.warn(`Hand control: fallo al conectar con ${url}`, error);
+            }
+        }
+
+        throw lastError || new Error('No se pudo conectar con el servidor de mano');
+    }
+
+    function connectSocket(url) {
+        return new Promise((resolve, reject) => {
+            let socket;
+            try {
+                socket = new WebSocket(url);
+            } catch (error) {
+                reject(error);
+                return;
+            }
+
+            const timeout = setTimeout(() => {
+                socket.close();
+                reject(new Error(`Tiempo de espera agotado conectando a ${url}`));
+            }, 20000);
 
             socket.addEventListener('open', () => {
+                clearTimeout(timeout);
                 handSocket = socket;
                 handModel = { connected: true };
                 socket.send(JSON.stringify({ role: 'controller' }));
@@ -396,6 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             socket.addEventListener('close', () => {
+                clearTimeout(timeout);
                 if (isActive) {
                     gestureStatus.textContent = 'Conexion cerrada';
                     stopHandControlFunc(false);
@@ -403,7 +442,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             socket.addEventListener('error', () => {
-                reject(new Error(`No se pudo conectar con el servidor de mano en http://${HAND_CONTROL_HOST}:${HAND_CONTROL_PORT}`));
+                clearTimeout(timeout);
+                reject(new Error(`No se pudo conectar con el servidor de mano en ${url}`));
             });
         });
     }

@@ -1,5 +1,6 @@
 import base64
 import json
+import os
 import socket
 from typing import Any
 
@@ -11,7 +12,7 @@ import uvicorn
 
 
 HOST = "0.0.0.0"
-PORT = 8000
+PORT = int(os.environ.get("PORT", "8000"))
 
 app = FastAPI()
 
@@ -119,30 +120,33 @@ def detect_gesture_mediapipe(hand_landmarks, state: dict[str, Any]) -> dict[str,
 
 def skin_mask(frame) -> np.ndarray:
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-    lower_skin = np.array([0, 20, 70], dtype=np.uint8)
-    upper_skin = np.array([50, 255, 255], dtype=np.uint8)
-    mask = cv2.inRange(hsv, lower_skin, upper_skin)
+    # Dos rangos para cubrir distintos tonos de piel (H 0-180 en OpenCV)
+    mask1 = cv2.inRange(hsv, np.array([0, 25, 40], dtype=np.uint8), np.array([25, 255, 255], dtype=np.uint8))
+    mask2 = cv2.inRange(hsv, np.array([25, 25, 40], dtype=np.uint8), np.array([45, 255, 255], dtype=np.uint8))
+    mask = cv2.bitwise_or(mask1, mask2)
     mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, np.ones((5, 5), np.uint8))
     mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((7, 7), np.uint8))
     return mask
 
 
-def detect_gesture_opencv(frame, state: dict[str, Any]) -> dict[str, Any]:
+def detect_gesture_opencv(frame, state: dict[str, Any]) -> tuple[dict[str, Any], Any]:
     h, w = frame.shape[:2]
     mask = skin_mask(frame)
 
     contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if not contours:
         state = reset_gesture_state(state, "waiting")
-        return state, None
+        return state, frame
 
     # Tomar el contorno más grande (asumimos que es la mano)
     largest = max(contours, key=cv2.contourArea)
     area = cv2.contourArea(largest)
 
-    if area < 3000:
+    # Umbral relativo al tamaño del frame (el cliente envía 320x240)
+    min_area = max(600, int((w * h) * 0.02))
+    if area < min_area:
         state = reset_gesture_state(state, "waiting")
-        return state, None
+        return state, frame
 
     x, y, cw, ch = cv2.boundingRect(largest)
     center_x = int((x + cw / 2) / w * 100)
@@ -151,17 +155,29 @@ def detect_gesture_opencv(frame, state: dict[str, Any]) -> dict[str, Any]:
     state["cursor_x"] = center_x
     state["cursor_y"] = center_y
     state["scroll"] = 0
-    state["click"] = False
+
+    # Clic: la mano se encoge bruscamente (puño / pinza)
+    prev_area = state.get("prev_area", 0)
+    if prev_area > 0:
+        ratio = area / prev_area
+        if ratio < 0.62 and not state.get("pinch_locked", False):
+            state["click"] = True
+            state["pinch_locked"] = True
+        elif ratio > 0.78:
+            state["pinch_locked"] = False
+            state["click"] = False
+    state["prev_area"] = area
 
     # Clasificar gesto básico por aspecto del contorno
     aspect_ratio = cw / ch if ch > 0 else 1
+    frame_area = w * h
 
     if aspect_ratio < 0.85:
         # Mano más alta que ancha -> dedos extendidos (pointer)
         state["gesture"] = "pointer"
     elif aspect_ratio > 1.15:
         # Mano más ancha que alta -> posible puño o mano abierta
-        if area > 12000:
+        if area > frame_area * 0.15:
             state["gesture"] = "fist"
         else:
             state["gesture"] = "pointer"
@@ -369,6 +385,17 @@ async def root():
     )
 
 
+@app.get("/health")
+async def health():
+    return {
+        "status": "ok",
+        "backend": "mediapipe" if USE_MEDIAPIPE else "opencv",
+        "port": PORT,
+        "clients": len(clients),
+        "viewers": len(viewers),
+    }
+
+
 @app.get("/viewer")
 async def viewer():
     return HTMLResponse(MONITOR_HTML)
@@ -412,7 +439,18 @@ async def websocket_endpoint(websocket: WebSocket):
                 if action != "frame":
                     continue
 
-                state, processed_frame = process_user_frame(client_id, payload["frame"])
+                try:
+                    state, processed_frame = process_user_frame(client_id, payload["frame"])
+                except Exception as exc:  # noqa: BLE001
+                    # Un frame defectuoso no debe cerrar la sesion
+                    print(f"[hand_control] error procesando frame: {exc}")
+                    state = gesture_states.setdefault(client_id, default_gesture_state())
+                    state["click"] = False
+                    state["scroll"] = 0
+                    state["gesture"] = "waiting"
+                    fallback = decode_frame(payload.get("frame", ""))
+                    processed_frame = fallback if fallback is not None else np.zeros((240, 320, 3), dtype=np.uint8)
+
                 response = {
                     "status": "tracking",
                     "client_id": client_id,
